@@ -22,6 +22,28 @@ var mobile = false;
 var foodSides = 10;
 var virusSides = 20;
 
+
+var mouse = {
+  image: new Image(),
+  size: 100
+};
+mouse.image.src = "img/mouse.png";
+var grass = {
+  image: new Image(),
+  size: 75
+};
+grass.image.src = "img/grass.png";
+var knight = {
+  image: new Image(),
+  size: 125
+};
+knight.image.src = "img/knight.png";
+var tree = {
+  image: new Image(),
+  size: 250
+};
+tree.image.src = "img/tree.jpg";
+
 var debug = function(args) {
     if (console && console.log) {
         console.log(args);
@@ -120,7 +142,7 @@ var kicked = false;
 var continuity = false;
 var startPingTime = 0;
 var toggleMassState = 0;
-var backgroundColor = '#f2fbff';
+var backgroundColor = '#33cc33';
 var lineColor = '#000000';
 
 var foodConfig = {
@@ -664,17 +686,30 @@ function drawCircle(centerX, centerY, radius, sides) {
 }
 
 function drawFood(food) {
-    graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
-    graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
-    graph.lineWidth = foodConfig.border;
-    drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, foodSides);
+    // graph.strokeStyle = 'hsl(' + food.hue + ', 100%, 45%)';
+    // graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
+    // graph.lineWidth = foodConfig.border;
+    // drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, foodSides);
+    
+    graph.save();
+    graph.translate(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2); // change origin
+    graph.rotate(food.direction * Math.PI / 180);
+    graph.drawImage(mouse.image, -mouse.size/2 , -mouse.size/2 ,mouse.size, mouse.size);
+    graph.restore();
+
+    // graph.rotate();
+    // graph.drawImage(, , , );
+    // graph.rotate(-food.direction * Math.PI / 180);
 }
 
-function drawVirus(virus) {
-    graph.strokeStyle = virus.stroke;
-    graph.fillStyle = virus.fill;
-    graph.lineWidth = virus.strokeWidth;
-    drawCircle(virus.x - player.x + screenWidth / 2, virus.y - player.y + screenHeight / 2, virus.radius, virusSides);
+function drawTree(virus) {
+    // graph.strokeStyle = virus.stroke;
+    // graph.fillStyle = virus.fill;
+    // graph.lineWidth = virus.strokeWidth;
+    // drawCircle(virus.x - player.x + screenWidth / 2, virus.y - player.y + screenHeight / 2, virus.radius, virusSides);
+
+    graph.drawImage(tree.image, virus.x - player.x + screenWidth / 2 , virus.y - player.y + screenHeight / 2 , tree.size, tree.size);
+
 }
 
 function drawFireFood(mass) {
@@ -690,118 +725,122 @@ function drawPlayers(order) {
         y: player.y - (screenHeight / 2)
     };
 
-    for(var z=0; z<order.length; z++)
+    // console.log(users);
+    // halt();
+
+
+    for(var i = 0; i < users.length; i++)
     {
-        var userCurrent = users[order[z].nCell];
-        var cellCurrent = users[order[z].nCell].cells[order[z].nDiv];
-
-        var x=0;
-        var y=0;
-
-        var points = 30 + ~~(cellCurrent.mass/5);
-        var increase = Math.PI * 2 / points;
-
-        graph.strokeStyle = 'hsl(' + userCurrent.hue + ', 100%, 45%)';
-        graph.fillStyle = 'hsl(' + userCurrent.hue + ', 100%, 50%)';
-        graph.lineWidth = playerConfig.border;
-
-        var xstore = [];
-        var ystore = [];
-
-        spin += 0.0;
-
-        var circle = {
-            x: cellCurrent.x - start.x,
-            y: cellCurrent.y - start.y
-        };
-
-        for (var i = 0; i < points; i++) {
-
-            x = cellCurrent.radius * Math.cos(spin) + circle.x;
-            y = cellCurrent.radius * Math.sin(spin) + circle.y;
-            if(typeof(userCurrent.id) == "undefined") {
-                x = valueInRange(-userCurrent.x + screenWidth / 2, gameWidth - userCurrent.x + screenWidth / 2, x);
-                y = valueInRange(-userCurrent.y + screenHeight / 2, gameHeight - userCurrent.y + screenHeight / 2, y);
-            } else {
-                x = valueInRange(-cellCurrent.x - player.x + screenWidth/2 + (cellCurrent.radius/3), gameWidth - cellCurrent.x + gameWidth - player.x + screenWidth/2 - (cellCurrent.radius/3), x);
-                y = valueInRange(-cellCurrent.y - player.y + screenHeight/2 + (cellCurrent.radius/3), gameHeight - cellCurrent.y + gameHeight - player.y + screenHeight/2 - (cellCurrent.radius/3) , y);
-            }
-            spin += increase;
-            xstore[i] = x;
-            ystore[i] = y;
-        }
-        /*if (wiggle >= player.radius/ 3) inc = -1;
-        *if (wiggle <= player.radius / -3) inc = +1;
-        *wiggle += inc;
-        */
-        for (i = 0; i < points; ++i) {
-            if (i === 0) {
-                graph.beginPath();
-                graph.moveTo(xstore[i], ystore[i]);
-            } else if (i > 0 && i < points - 1) {
-                graph.lineTo(xstore[i], ystore[i]);
-            } else {
-                graph.lineTo(xstore[i], ystore[i]);
-                graph.lineTo(xstore[0], ystore[0]);
-            }
-
-        }
-        graph.lineJoin = 'round';
-        graph.lineCap = 'round';
-        graph.fill();
-        graph.stroke();
-        var nameCell = "";
-        if(typeof(userCurrent.id) == "undefined")
-            nameCell = player.name;
-        else
-            nameCell = userCurrent.name;
-
-        var fontSize = Math.max(cellCurrent.radius / 3, 12);
-        graph.lineWidth = playerConfig.textBorderSize;
-        graph.fillStyle = playerConfig.textColor;
-        graph.strokeStyle = playerConfig.textBorder;
-        graph.miterLimit = 1;
-        graph.lineJoin = 'round';
-        graph.textAlign = 'center';
-        graph.textBaseline = 'middle';
-        graph.font = 'bold ' + fontSize + 'px sans-serif';
-
-        if (toggleMassState === 0) {
-            graph.strokeText(nameCell, circle.x, circle.y);
-            graph.fillText(nameCell, circle.x, circle.y);
-        } else {
-            graph.strokeText(nameCell, circle.x, circle.y);
-            graph.fillText(nameCell, circle.x, circle.y);
-            graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
-            if(nameCell.length === 0) fontSize = 0;
-            graph.strokeText(Math.round(cellCurrent.mass), circle.x, circle.y+fontSize);
-            graph.fillText(Math.round(cellCurrent.mass), circle.x, circle.y+fontSize);
-        }
+      for(var j = 0; j < users[i].cells.length; j++)
+      {
+        graph.drawImage(knight.image, users[i].cells[j].x - player.x + screenWidth / 2 , users[i].cells[j].y - player.y + screenHeight / 2 , knight.size, knight.size);
+      }
     }
+
+
+    // for(var z=0; z<order.length; z++)
+    // {
+    //     var userCurrent = users[order[z].nCell];
+    //     var cellCurrent = users[order[z].nCell].cells[order[z].nDiv];
+
+    //     var x=0;
+    //     var y=0;
+
+    //     var points = 30 + ~~(cellCurrent.mass/5);
+    //     var increase = Math.PI * 2 / points;
+
+    //     graph.strokeStyle = 'hsl(' + userCurrent.hue + ', 100%, 45%)';
+    //     graph.fillStyle = 'hsl(' + userCurrent.hue + ', 100%, 50%)';
+    //     graph.lineWidth = playerConfig.border;
+
+    //     var xstore = [];
+    //     var ystore = [];
+
+    //     spin += 0.0;
+
+    //     var circle = {
+    //         x: cellCurrent.x - start.x,
+    //         y: cellCurrent.y - start.y
+    //     };
+
+    //     for (var i = 0; i < points; i++) {
+
+    //         x = cellCurrent.radius * Math.cos(spin) + circle.x;
+    //         y = cellCurrent.radius * Math.sin(spin) + circle.y;
+    //         if(typeof(userCurrent.id) == "undefined") {
+    //             x = valueInRange(-userCurrent.x + screenWidth / 2, gameWidth - userCurrent.x + screenWidth / 2, x);
+    //             y = valueInRange(-userCurrent.y + screenHeight / 2, gameHeight - userCurrent.y + screenHeight / 2, y);
+    //         } else {
+    //             x = valueInRange(-cellCurrent.x - player.x + screenWidth/2 + (cellCurrent.radius/3), gameWidth - cellCurrent.x + gameWidth - player.x + screenWidth/2 - (cellCurrent.radius/3), x);
+    //             y = valueInRange(-cellCurrent.y - player.y + screenHeight/2 + (cellCurrent.radius/3), gameHeight - cellCurrent.y + gameHeight - player.y + screenHeight/2 - (cellCurrent.radius/3) , y);
+    //         }
+    //         spin += increase;
+    //         xstore[i] = x;
+    //         ystore[i] = y;
+    //     }
+    //     /*if (wiggle >= player.radius/ 3) inc = -1;
+    //     *if (wiggle <= player.radius / -3) inc = +1;
+    //     *wiggle += inc;
+    //     */
+    //     for (i = 0; i < points; ++i) {
+    //         if (i === 0) {
+    //             graph.beginPath();
+    //             graph.moveTo(xstore[i], ystore[i]);
+    //         } else if (i > 0 && i < points - 1) {
+    //             graph.lineTo(xstore[i], ystore[i]);
+    //         } else {
+    //             graph.lineTo(xstore[i], ystore[i]);
+    //             graph.lineTo(xstore[0], ystore[0]);
+    //         }
+
+    //     }
+    //     graph.lineJoin = 'round';
+    //     graph.lineCap = 'round';
+    //     graph.fill();
+    //     graph.stroke();
+    //     var nameCell = "";
+    //     if(typeof(userCurrent.id) == "undefined")
+    //         nameCell = player.name;
+    //     else
+    //         nameCell = userCurrent.name;
+
+    //     var fontSize = Math.max(cellCurrent.radius / 3, 12);
+    //     graph.lineWidth = playerConfig.textBorderSize;
+    //     graph.fillStyle = playerConfig.textColor;
+    //     graph.strokeStyle = playerConfig.textBorder;
+    //     graph.miterLimit = 1;
+    //     graph.lineJoin = 'round';
+    //     graph.textAlign = 'center';
+    //     graph.textBaseline = 'middle';
+    //     graph.font = 'bold ' + fontSize + 'px sans-serif';
+
+    //     if (toggleMassState === 0) {
+    //         graph.strokeText(nameCell, circle.x, circle.y);
+    //         graph.fillText(nameCell, circle.x, circle.y);
+    //     } else {
+    //         graph.strokeText(nameCell, circle.x, circle.y);
+    //         graph.fillText(nameCell, circle.x, circle.y);
+    //         graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
+    //         if(nameCell.length === 0) fontSize = 0;
+    //         graph.strokeText(Math.round(cellCurrent.mass), circle.x, circle.y+fontSize);
+    //         graph.fillText(Math.round(cellCurrent.mass), circle.x, circle.y+fontSize);
+    //     }
+    // }
 }
 
 function valueInRange(min, max, value) {
     return Math.min(max, Math.max(min, value));
 }
 
-function drawgrid() {
-     graph.lineWidth = 1;
-     graph.strokeStyle = lineColor;
-     graph.globalAlpha = 0.15;
-     graph.beginPath();
-
-    for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 18) {
-        graph.moveTo(x, 0);
-        graph.lineTo(x, screenHeight);
+function drawGrass() {
+    for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 2) {
+      for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 2) {
+        graph.drawImage(grass.image, x , y ,grass.size, grass.size);
+      }
     }
 
-    for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 18) {
-        graph.moveTo(0, y);
-        graph.lineTo(screenWidth, y);
-    }
-
-    graph.stroke();
-    graph.globalAlpha = 1;
+    // graph.stroke();
+    // graph.globalAlpha = 1;
 }
 
 function drawborder() {
@@ -896,10 +935,10 @@ function gameLoop() {
             graph.fillStyle = backgroundColor;
             graph.fillRect(0, 0, screenWidth, screenHeight);
 
-            drawgrid();
+            drawGrass();
             foods.forEach(drawFood);
             fireFood.forEach(drawFireFood);
-            viruses.forEach(drawVirus);
+            viruses.forEach(drawTree);
             
             if (borderDraw) {
                 drawborder();

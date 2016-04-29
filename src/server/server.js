@@ -23,7 +23,7 @@ var tree = quadtree.QUAD.init(args);
 
 var users = [];
 var massFood = [];
-var food = [];
+var mice = [];
 var virus = [];
 var sockets = {};
 
@@ -48,7 +48,8 @@ function addFood(toAdd) {
             y: position.y,
             radius: radius,
             mass: Math.random() + 2,
-            hue: Math.round(Math.random() * 360)
+            hue: Math.round(Math.random() * 360),
+            direction: Math.random() * 360
         });
     }
 }
@@ -583,6 +584,9 @@ function tickPlayer(currentPlayer) {
 function moveloop() {
     for (var i = 0; i < users.length; i++) {
         tickPlayer(users[i]);
+    }
+    for (var i = 0; i < mice.length; i++) {
+        tickMouse(mice[i]);
     }
     for (i=0; i < massFood.length; i++) {
         if(massFood[i].speed > 0) moveMass(massFood[i]);
