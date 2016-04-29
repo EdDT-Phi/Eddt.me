@@ -693,7 +693,7 @@ function drawFood(food) {
     
     graph.save();
     graph.translate(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2); // change origin
-    graph.rotate(food.direction * Math.PI / 180);
+    graph.rotate(food.direction);
     graph.drawImage(mouse.image, -mouse.size/2 , -mouse.size/2 ,mouse.size, mouse.size);
     graph.restore();
 
@@ -833,8 +833,8 @@ function valueInRange(min, max, value) {
 }
 
 function drawGrass() {
-    for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 2) {
-      for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 2) {
+    for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 4) {
+      for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 4) {
         graph.drawImage(grass.image, x , y ,grass.size, grass.size);
       }
     }

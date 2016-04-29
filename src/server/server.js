@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 var SAT = require('sat');
 
 // Import game settings.
-var c = require('../../config.json');
+var conf = require('../../config.json');
 
 // Import utilities.
 var util = require('./lib/util');
@@ -16,7 +16,7 @@ var util = require('./lib/util');
 // Import quadtree.
 var quadtree= require('../../quadtree');
 
-var args = {x : 0, y : 0, h : c.gameHeight, w : c.gameWidth, maxChildren : 1, maxDepth : 5};
+var args = {x : 0, y : 0, h : conf.gameHeight, w : conf.gameWidth, maxChildren : 1, maxDepth : 5};
 console.log(args);
 
 var tree = quadtree.QUAD.init(args);
@@ -33,48 +33,48 @@ var leaderboardChanged = false;
 var V = SAT.Vector;
 var C = SAT.Circle;
 
-var initMassLog = util.log(c.defaultPlayerMass, c.slowBase);
+var initMassLog = util.log(conf.defaultPlayerMass, conf.slowBase);
 
 app.use(express.static(__dirname + '/../client'));
 
 function addFood(toAdd) {
-    var radius = util.massToRadius(c.foodMass);
+    var radius = util.massToRadius(conf.foodMass);
     while (toAdd--) {
-        var position = c.foodUniformDisposition ? util.uniformPosition(food, radius) : util.randomPosition(radius);
-        food.push({
+        var position = conf.foodUniformDisposition ? util.uniformPosition(mice, radius) : util.randomPosition(radius);
+        mice.push({
             // Make IDs unique.
-            id: ((new Date()).getTime() + '' + food.length) >>> 0,
+            id: ((new Date()).getTime() + '' + mice.length) >>> 0,
             x: position.x,
             y: position.y,
             radius: radius,
             mass: Math.random() + 2,
             hue: Math.round(Math.random() * 360),
-            direction: Math.random() * 360
+            direction: Math.random() * 2 * Math.PI
         });
     }
 }
 
 function addVirus(toAdd) {
     while (toAdd--) {
-        var mass = util.randomInRange(c.virus.defaultMass.from, c.virus.defaultMass.to, true);
+        var mass = util.randomInRange(conf.virus.defaultMass.from, conf.virus.defaultMass.to, true);
         var radius = util.massToRadius(mass);
-        var position = c.virusUniformDisposition ? util.uniformPosition(virus, radius) : util.randomPosition(radius);
+        var position = conf.virusUniformDisposition ? util.uniformPosition(virus, radius) : util.randomPosition(radius);
         virus.push({
             id: ((new Date()).getTime() + '' + virus.length) >>> 0,
             x: position.x,
             y: position.y,
             radius: radius,
             mass: mass,
-            fill: c.virus.fill,
-            stroke: c.virus.stroke,
-            strokeWidth: c.virus.strokeWidth
+            fill: conf.virus.fill,
+            stroke: conf.virus.stroke,
+            strokeWidth: conf.virus.strokeWidth
         });
     }
 }
 
 function removeFood(toRem) {
     while (toRem--) {
-        food.pop();
+        mice.pop();
     }
 }
 
@@ -90,7 +90,7 @@ function movePlayer(player) {
         var deg = Math.atan2(target.y, target.x);
         var slowDown = 1;
         if(player.cells[i].speed <= 6.25) {
-            slowDown = util.log(player.cells[i].mass, c.slowBase) - initMassLog + 1;
+            slowDown = util.log(player.cells[i].mass, conf.slowBase) - initMassLog + 1;
         }
 
         var deltaY = player.cells[i].speed * Math.sin(deg)/ slowDown;
@@ -115,7 +115,7 @@ function movePlayer(player) {
                 var distance = Math.sqrt(Math.pow(player.cells[j].y-player.cells[i].y,2) + Math.pow(player.cells[j].x-player.cells[i].x,2));
                 var radiusTotal = (player.cells[i].radius + player.cells[j].radius);
                 if(distance < radiusTotal) {
-                    if(player.lastSplit > new Date().getTime() - 1000 * c.mergeTimer) {
+                    if(player.lastSplit > new Date().getTime() - 1000 * conf.mergeTimer) {
                         if(player.cells[i].x < player.cells[j].x) {
                             player.cells[i].x--;
                         } else if(player.cells[i].x > player.cells[j].x) {
@@ -137,11 +137,11 @@ function movePlayer(player) {
         }
         if(player.cells.length > i) {
             var borderCalc = player.cells[i].radius / 3;
-            if (player.cells[i].x > c.gameWidth - borderCalc) {
-                player.cells[i].x = c.gameWidth - borderCalc;
+            if (player.cells[i].x > conf.gameWidth - borderCalc) {
+                player.cells[i].x = conf.gameWidth - borderCalc;
             }
-            if (player.cells[i].y > c.gameHeight - borderCalc) {
-                player.cells[i].y = c.gameHeight - borderCalc;
+            if (player.cells[i].y > conf.gameHeight - borderCalc) {
+                player.cells[i].y = conf.gameHeight - borderCalc;
             }
             if (player.cells[i].x < borderCalc) {
                 player.cells[i].x = borderCalc;
@@ -175,11 +175,11 @@ function moveMass(mass) {
 
     var borderCalc = mass.radius + 5;
 
-    if (mass.x > c.gameWidth - borderCalc) {
-        mass.x = c.gameWidth - borderCalc;
+    if (mass.x > conf.gameWidth - borderCalc) {
+        mass.x = conf.gameWidth - borderCalc;
     }
-    if (mass.y > c.gameHeight - borderCalc) {
-        mass.y = c.gameHeight - borderCalc;
+    if (mass.y > conf.gameHeight - borderCalc) {
+        mass.y = conf.gameHeight - borderCalc;
     }
     if (mass.x < borderCalc) {
         mass.x = borderCalc;
@@ -190,14 +190,14 @@ function moveMass(mass) {
 }
 
 function balanceMass() {
-    var totalMass = food.length * c.foodMass +
+    var totalMass = mice.length * conf.foodMass +
         users
             .map(function(u) {return u.massTotal; })
             .reduce(function(pu,cu) { return pu+cu;}, 0);
 
-    var massDiff = c.gameMass - totalMass;
-    var maxFoodDiff = c.maxFood - food.length;
-    var foodDiff = parseInt(massDiff / c.foodMass) - maxFoodDiff;
+    var massDiff = conf.gameMass - totalMass;
+    var maxFoodDiff = conf.maxFood - mice.length;
+    var foodDiff = parseInt(massDiff / conf.foodMass) - maxFoodDiff;
     var foodToAdd = Math.min(foodDiff, maxFoodDiff);
     var foodToRemove = -Math.max(foodDiff, maxFoodDiff);
 
@@ -212,7 +212,7 @@ function balanceMass() {
         //console.log('[DEBUG] Mass rebalanced!');
     }
 
-    var virusToAdd = c.maxVirus - virus.length;
+    var virusToAdd = conf.maxVirus - virus.length;
 
     if (virusToAdd > 0) {
         addVirus(virusToAdd);
@@ -223,19 +223,19 @@ io.on('connection', function (socket) {
     console.log('A user connected!', socket.handshake.query.type);
 
     var type = socket.handshake.query.type;
-    var radius = util.massToRadius(c.defaultPlayerMass);
-    var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
+    var radius = util.massToRadius(conf.defaultPlayerMass);
+    var position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
     var cells = [];
     var massTotal = 0;
     if(type === 'player') {
         cells = [{
-            mass: c.defaultPlayerMass,
+            mass: conf.defaultPlayerMass,
             x: position.x,
             y: position.y,
             radius: radius
         }];
-        massTotal = c.defaultPlayerMass;
+        massTotal = conf.defaultPlayerMass;
     }
 
     var currentPlayer = {
@@ -266,8 +266,8 @@ io.on('connection', function (socket) {
             console.log('[INFO] Player ' + player.name + ' connected!');
             sockets[player.id] = socket;
 
-            var radius = util.massToRadius(c.defaultPlayerMass);
-            var position = c.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
+            var radius = util.massToRadius(conf.defaultPlayerMass);
+            var position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
             player.x = position.x;
             player.y = position.y;
@@ -275,12 +275,12 @@ io.on('connection', function (socket) {
             player.target.y = 0;
             if(type === 'player') {
                 player.cells = [{
-                    mass: c.defaultPlayerMass,
+                    mass: conf.defaultPlayerMass,
                     x: position.x,
                     y: position.y,
                     radius: radius
                 }];
-                player.massTotal = c.defaultPlayerMass;
+                player.massTotal = conf.defaultPlayerMass;
             }
             else {
                  player.cells = [];
@@ -294,8 +294,8 @@ io.on('connection', function (socket) {
             io.emit('playerJoin', { name: currentPlayer.name });
 
             socket.emit('gameSetup', {
-                gameWidth: c.gameWidth,
-                gameHeight: c.gameHeight
+                gameWidth: conf.gameWidth,
+                gameHeight: conf.gameHeight
             });
             console.log('Total players: ' + users.length);
         }
@@ -329,14 +329,14 @@ io.on('connection', function (socket) {
     socket.on('playerChat', function(data) {
         var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
         var _message = data.message.replace(/(<([^>]+)>)/ig, '');
-        if (c.logChat === 1) {
+        if (conf.logChat === 1) {
             console.log('[CHAT] [' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + '] ' + _sender + ': ' + _message);
         }
         socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message.substring(0,35)});
     });
 
     socket.on('pass', function(data) {
-        if (data[0] === c.adminPass) {
+        if (data[0] === conf.adminPass) {
             console.log('[ADMIN] ' + currentPlayer.name + ' just logged in as an admin!');
             socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
             socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
@@ -398,10 +398,10 @@ io.on('connection', function (socket) {
         // Fire food.
         for(var i=0; i<currentPlayer.cells.length; i++)
         {
-            if(((currentPlayer.cells[i].mass >= c.defaultPlayerMass + c.fireFood) && c.fireFood > 0) || (currentPlayer.cells[i].mass >= 20 && c.fireFood === 0)){
+            if(((currentPlayer.cells[i].mass >= conf.defaultPlayerMass + conf.fireFood) && conf.fireFood > 0) || (currentPlayer.cells[i].mass >= 20 && conf.fireFood === 0)){
                 var masa = 1;
-                if(c.fireFood > 0)
-                    masa = c.fireFood;
+                if(conf.fireFood > 0)
+                    masa = conf.fireFood;
                 else
                     masa = currentPlayer.cells[i].mass*0.1;
                 currentPlayer.cells[i].mass -= masa;
@@ -425,7 +425,7 @@ io.on('connection', function (socket) {
     });
     socket.on('2', function(virusCell) {
         function splitCell(cell) {
-            if(cell.mass >= c.defaultPlayerMass*2) {
+            if(cell.mass >= conf.defaultPlayerMass*2) {
                 cell.mass = cell.mass/2;
                 cell.radius = util.massToRadius(cell.mass);
                 currentPlayer.cells.push({
@@ -438,14 +438,14 @@ io.on('connection', function (socket) {
             }
         }
 
-        if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*2) {
+        if(currentPlayer.cells.length < conf.limitSplit && currentPlayer.massTotal >= conf.defaultPlayerMass*2) {
             //Split single cell from virus
             if(virusCell) {
               splitCell(currentPlayer.cells[virusCell]);
             }
             else {
               //Split all cells
-              if(currentPlayer.cells.length < c.limitSplit && currentPlayer.massTotal >= c.defaultPlayerMass*2) {
+              if(currentPlayer.cells.length < conf.limitSplit && currentPlayer.massTotal >= conf.defaultPlayerMass*2) {
                   var numMax = currentPlayer.cells.length;
                   for(var d=0; d<numMax; d++) {
                       splitCell(currentPlayer.cells[d]);
@@ -458,8 +458,8 @@ io.on('connection', function (socket) {
 });
 
 function tickPlayer(currentPlayer) {
-    if(currentPlayer.lastHeartbeat < new Date().getTime() - c.maxHeartbeatInterval) {
-        sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + c.maxHeartbeatInterval + ' ago.');
+    if(currentPlayer.lastHeartbeat < new Date().getTime() - conf.maxHeartbeatInterval) {
+        sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + conf.maxHeartbeatInterval + ' ago.');
         sockets[currentPlayer.id].disconnect();
     }
 
@@ -470,8 +470,8 @@ function tickPlayer(currentPlayer) {
     }
 
     function deleteFood(f) {
-        food[f] = {};
-        food.splice(f, 1);
+        mice[f] = {};
+        mice.splice(f, 1);
     }
 
     function eatMass(m) {
@@ -536,7 +536,7 @@ function tickPlayer(currentPlayer) {
             currentCell.radius
         );
 
-        var foodEaten = food.map(funcFood)
+        var foodEaten = mice.map(funcFood)
             .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
         foodEaten.forEach(deleteFood);
@@ -565,7 +565,7 @@ function tickPlayer(currentPlayer) {
 
         if(typeof(currentCell.speed) == "undefined")
             currentCell.speed = 6.25;
-        masaGanada += (foodEaten.length * c.foodMass);
+        masaGanada += (foodEaten.length * conf.foodMass);
         currentCell.mass += masaGanada;
         currentPlayer.massTotal += masaGanada;
         currentCell.radius = util.massToRadius(currentCell.mass);
@@ -581,14 +581,36 @@ function tickPlayer(currentPlayer) {
     }
 }
 
+
+function tickMouse(mouse)
+{
+  var dx = -conf.mouse.speed * Math.sin(mouse.direction);
+  var dy = conf.mouse.speed * Math.cos(mouse.direction);
+  if (mouse.x + dx > conf.gameWidth || mouse.y + dy > conf.gameHeight || mouse.x + dx < 0 || mouse.y + dy < 0) 
+  {
+    mouse.direction += 0.5;
+  } else {
+    mouse.x += dx;
+    mouse.y += dy;
+  }
+
+  // id: ((new Date()).getTime() + '' + mice.length) >>> 0,
+  //           x: position.x,
+  //           y: position.y,
+  //           radius: radius,
+  //           mass: Math.random() + 2,
+  //           hue: Math.round(Math.random() * 360),
+  //           direction: Math.random() * 360
+}
+
 function moveloop() {
     for (var i = 0; i < users.length; i++) {
         tickPlayer(users[i]);
     }
-    for (var i = 0; i < mice.length; i++) {
+    for (i = 0; i < mice.length; i++) {
         tickMouse(mice[i]);
     }
-    for (i=0; i < massFood.length; i++) {
+    for (i = 0; i < massFood.length; i++) {
         if(massFood[i].speed > 0) moveMass(massFood[i]);
     }
 }
@@ -622,8 +644,8 @@ function gameloop() {
         }
         for (i = 0; i < users.length; i++) {
             for(var z=0; z < users[i].cells.length; z++) {
-                if (users[i].cells[z].mass * (1 - (c.massLossRate / 1000)) > c.defaultPlayerMass) {
-                    var massLoss = users[i].cells[z].mass * (1 - (c.massLossRate / 1000));
+                if (users[i].cells[z].mass * (1 - (conf.massLossRate / 1000)) > conf.defaultPlayerMass) {
+                    var massLoss = users[i].cells[z].mass * (1 - (conf.massLossRate / 1000));
                     users[i].massTotal -= users[i].cells[z].mass - massLoss;
                     users[i].cells[z].mass = massLoss;
                 }
@@ -636,10 +658,10 @@ function gameloop() {
 function sendUpdates() {
     users.forEach( function(u) {
         // center the view if x/y is undefined, this will happen for spectators
-        u.x = u.x || c.gameWidth / 2;
-        u.y = u.y || c.gameHeight / 2;
+        u.x = u.x || conf.gameWidth / 2;
+        u.y = u.y || conf.gameHeight / 2;
 
-        var visibleFood  = food
+        var visibleFood  = mice
             .map(function(f) {
                 if ( f.x > u.x - u.screenWidth/2 - 20 &&
                     f.x < u.x + u.screenWidth/2 + 20 &&
@@ -719,17 +741,17 @@ function sendUpdates() {
 
 setInterval(moveloop, 1000 / 60);
 setInterval(gameloop, 1000);
-setInterval(sendUpdates, 1000 / c.networkUpdateFactor);
+setInterval(sendUpdates, 1000 / conf.networkUpdateFactor);
 
 // Don't touch, IP configurations.
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
-var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || c.port;
+var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || conf.port;
 if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
     http.listen( serverport, ipaddress, function() {
         console.log('[DEBUG] Listening on *:' + serverport);
     });
 } else {
     http.listen( serverport, function() {
-        console.log('[DEBUG] Listening on *:' + c.port);
+        console.log('[DEBUG] Listening on *:' + conf.port);
     });
 }
