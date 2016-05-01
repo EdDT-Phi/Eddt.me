@@ -723,10 +723,10 @@ function drawTree(tree) {
 }
 
 function drawSpider(spiderToDraw) {
-    // graph.strokeStyle = spider.stroke;
-    // graph.fillStyle = spider.fill;
-    // graph.lineWidth = spider.strokeWidth;
-    // drawCircle(spider.x - player.x + screenWidth / 2, spider.y - player.y + screenHeight / 2, spider.radius, spiderSides);
+    graph.strokeStyle = spider.stroke;
+    graph.fillStyle = spider.fill;
+    graph.lineWidth = spider.strokeWidth;
+    drawCircle(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2, spiderToDraw.radius, spiderSides);
     // console.log(spider);
 
     graph.save();

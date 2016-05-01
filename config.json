@@ -15,10 +15,10 @@
 		"splitMass": 180
 	},
   "mouse": {
-    "speed" : 1
+    "speed" : 0.5
   },
   "spider": {
-    "speed" : 1
+    "speed" : 0.5
   },
   "gameWidth": 5000,
   "gameHeight": 5000,

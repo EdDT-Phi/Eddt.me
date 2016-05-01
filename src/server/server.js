@@ -56,18 +56,18 @@ function addFood(toAdd) {
 
 function addSpider(toAdd) {
     while (toAdd--) {
-        // var mass = util.randomInRange(conf.spider.defaultMass.from, conf.spider.defaultMass.to, true);
-        // var radius = util.massToRadius(mass);
+        var mass = 50;//util.randomInRange(conf.spider.defaultMass.from, conf.spider.defaultMass.to, true);
+        var radius = util.massToRadius(mass);
         // var position = conf.spiderUniformDisposition ? util.uniformPosition(spider, radius) : util.randomPosition(radius);
         spiders.push({
             id: ((new Date()).getTime() + '' + spiders.length) >>> 0,
             x: Math.random() * conf.gameHeight, //position.x,
             y: Math.random() * conf.gameWidth, //position.y,
-            // radius: radius,
+            radius: radius,
             // mass: mass,
             // fill: conf.spider.fill,
             // stroke: conf.spider.stroke,
-            // strokeWidth: conf.spider.strokeWidth,
+            // strokeWidth: conf.spider.strokeWidth,b
             direction: Math.random() * 2 * Math.PI
         });
     }
@@ -553,7 +553,8 @@ function tickPlayer(currentPlayer) {
            .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
         if(spiderCollision > 0 && currentCell.mass > spiders[spiderCollision].mass) {
-          sockets[currentPlayer.id].emit('spiderSplit', z);
+            console.log("split");
+            sockets[currentPlayer.id].emit('spiderSplit', z);
         }
 
         var masaGanada = 0;
@@ -598,35 +599,79 @@ function tickMouse(mouse)
     mouse.x += dx;
     mouse.y += dy;
   }
-
-  // id: ((new Date()).getTime() + '' + mice.length) >>> 0,
-  //           x: position.x,
-  //           y: position.y,
-  //           radius: radius,
-  //           mass: Math.random() + 2,
-  //           hue: Math.round(Math.random() * 360),
-  //           direction: Math.random() * 360
 }
 
 function tickSpider(spider)
 {
-  var dx = -conf.spider.speed * Math.sin(spider.direction);
-  var dy = conf.spider.speed * Math.cos(spider.direction);
-  if (spider.x + dx > conf.gameWidth || spider.y + dy > conf.gameHeight || spider.x + dx < 0 || spider.y + dy < 0)
-  {
-    spider.direction += 0.5;
-  } else {
-    spider.x += dx;
-    spider.y += dy;
-  }
+   var minDist = 10000, minMouse;
+   mice.forEach(function(mouse)
+   {
+      var dist = util.getDistance(spider, mouse);
+      if(dist < minDist) {
+         minDist = dist;
+         minMouse = mouse;
+      }
 
-  // id: ((new Date()).getTime() + '' + mice.length) >>> 0,
-  //           x: position.x,
-  //           y: position.y,
-  //           radius: radius,
-  //           mass: Math.random() + 2,
-  //           hue: Math.round(Math.random() * 360),
-  //           direction: Math.random() * 360
+   });
+
+   // spider.direction = Math.PI/2;
+
+   var newDirection = 0;
+   if(minMouse.y === spider.y)
+   {
+      if(minMouse.x < spider.x)
+      {
+         newDirection = Math.PI * 0.5;
+      }
+      else
+      {
+         newDirection = Math.PI * 1.5;
+      }
+   }
+   else
+   {
+      newDirection = Math.atan((spider.x - minMouse.x)/(minMouse.y - spider.y));
+   }
+   if(minMouse.y-spider.y < 0)
+   {
+      newDirection += Math.PI;
+   }
+
+
+   // newDirection = newDirection
+   // if(newDirection > Math.PI * 2)
+   // {
+   //    newDirection -= Math.PI*2;
+   // }
+   // if(spider.direction > Math.PI * 2)
+   // {
+   //    spider.direction -= Math.PI*2;
+   // }
+   // var difference = spider.direction - newDirection;
+
+   // var change = Math.min(0.05, Math.abs(spider.direction-newDirection));
+   // if(spider.direction > newDirection)
+   // {
+      // spider.direction -= change;
+   // }
+   // else
+   // {
+      spider.direction = newDirection;
+   // }
+
+
+
+
+
+   var dx = -conf.spider.speed * Math.sin(spider.direction);
+   var dy = conf.spider.speed * Math.cos(spider.direction);
+   // if (spider.x + dx > conf.gameWidth || spider.y + dy > conf.gameHeight || spider.x + dx < 0 || spider.y + dy < 0)
+   // {
+   //   spider.direction += 0.5;
+   // } else {
+  spider.x += dx;
+  spider.y += dy;
+   // }
 }
 
 function moveloop() {
@@ -690,7 +735,13 @@ function sendUpdates() {
         u.x = u.x || conf.gameWidth / 2;
         u.y = u.y || conf.gameHeight / 2;
 
-        var visibleFood  = mice
+
+
+        /*
+            uses filter to get rid of undefined values
+        */
+
+        var visibleMice  = mice
             .map(function(f) {
                 if ( f.x > u.x - u.screenWidth/2 - 20 &&
                     f.x < u.x + u.screenWidth/2 + 20 &&
@@ -702,12 +753,12 @@ function sendUpdates() {
             .filter(function(f) { return f; });
 
         var visibleSpiders  = spiders
-            .map(function(f) {
-                if ( f.x > u.x - u.screenWidth/2&& //- f.radius &&
-                    f.x < u.x + u.screenWidth/2&& //+ f.radius &&
-                    f.y > u.y - u.screenHeight/2&& //- f.radius &&
-                    f.y < u.y + u.screenHeight/2){ // + f.radius) {
-                    return f;
+            .map(function(spider) {
+                if ( spider.x > u.x - u.screenWidth/2 - spider.radius &&
+                    spider.x < u.x + u.screenWidth/2 + spider.radius &&
+                    spider.y > u.y - u.screenHeight/2 - spider.radius &&
+                    spider.y < u.y + u.screenHeight/2  + spider.radius) {
+                    return spider;
                 }
             })
             .filter(function(f) { return f; });
@@ -757,7 +808,7 @@ function sendUpdates() {
             })
             .filter(function(f) { return f; });
 
-        sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleSpiders);
+        sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleMice, visibleMass, visibleSpiders);
         if (leaderboardChanged) {
             sockets[u.id].emit('leaderboard', {
                 players: users.length,
