@@ -24,7 +24,7 @@ var tree = quadtree.QUAD.init(args);
 var users = [];
 var massFood = [];
 var mice = [];
-var virus = [];
+var spiders = [];
 var sockets = {};
 
 var leaderboard = [];
@@ -54,20 +54,21 @@ function addFood(toAdd) {
     }
 }
 
-function addVirus(toAdd) {
+function addSpider(toAdd) {
     while (toAdd--) {
-        var mass = util.randomInRange(conf.virus.defaultMass.from, conf.virus.defaultMass.to, true);
-        var radius = util.massToRadius(mass);
-        var position = conf.virusUniformDisposition ? util.uniformPosition(virus, radius) : util.randomPosition(radius);
-        virus.push({
-            id: ((new Date()).getTime() + '' + virus.length) >>> 0,
-            x: position.x,
-            y: position.y,
-            radius: radius,
-            mass: mass,
-            fill: conf.virus.fill,
-            stroke: conf.virus.stroke,
-            strokeWidth: conf.virus.strokeWidth
+        // var mass = util.randomInRange(conf.spider.defaultMass.from, conf.spider.defaultMass.to, true);
+        // var radius = util.massToRadius(mass);
+        // var position = conf.spiderUniformDisposition ? util.uniformPosition(spider, radius) : util.randomPosition(radius);
+        spiders.push({
+            id: ((new Date()).getTime() + '' + spiders.length) >>> 0,
+            x: Math.random() * conf.gameHeight, //position.x,
+            y: Math.random() * conf.gameWidth, //position.y,
+            // radius: radius,
+            // mass: mass,
+            // fill: conf.spider.fill,
+            // stroke: conf.spider.stroke,
+            // strokeWidth: conf.spider.strokeWidth,
+            direction: Math.random() * 2 * Math.PI
         });
     }
 }
@@ -196,27 +197,31 @@ function balanceMass() {
             .reduce(function(pu,cu) { return pu+cu;}, 0);
 
     var massDiff = conf.gameMass - totalMass;
-    var maxFoodDiff = conf.maxFood - mice.length;
-    var foodDiff = parseInt(massDiff / conf.foodMass) - maxFoodDiff;
-    var foodToAdd = Math.min(foodDiff, maxFoodDiff);
-    var foodToRemove = -Math.max(foodDiff, maxFoodDiff);
 
-    if (foodToAdd > 0) {
-        //console.log('[DEBUG] Adding ' + foodToAdd + ' food to level!');
-        addFood(foodToAdd);
+
+    var maxMiceDiff = conf.maxMice - mice.length;
+    var MiceDiff = parseInt(massDiff / conf.foodMass) - maxMiceDiff;
+    var MiceToAdd = Math.min(MiceDiff, maxMiceDiff);
+    var miceToRemove = -Math.max(MiceDiff, maxMiceDiff);
+
+    if (MiceToAdd > 0) {
+        //console.log('[DEBUG] Adding ' + MiceToAdd + ' food to level!');
+        addFood(MiceToAdd);
         //console.log('[DEBUG] Mass rebalanced!');
     }
-    else if (foodToRemove > 0) {
-        //console.log('[DEBUG] Removing ' + foodToRemove + ' food from level!');
-        removeFood(foodToRemove);
+    else if (miceToRemove > 0) {
+        //console.log('[DEBUG] Removing ' + miceToRemove + ' food from level!');
+        removeFood(miceToRemove);
         //console.log('[DEBUG] Mass rebalanced!');
     }
 
-    var virusToAdd = conf.maxVirus - virus.length;
+    var spiderToAdd = conf.maxSpider - spiders.length;
 
-    if (virusToAdd > 0) {
-        addVirus(virusToAdd);
-    }
+    if (spiderToAdd > 0)
+        addSpider(spiderToAdd);
+    // } else {
+        // console.log(spiders.length);
+    // }
 }
 
 io.on('connection', function (socket) {
@@ -423,7 +428,7 @@ io.on('connection', function (socket) {
             }
         }
     });
-    socket.on('2', function(virusCell) {
+    socket.on('2', function(spiderCell) {
         function splitCell(cell) {
             if(cell.mass >= conf.defaultPlayerMass*2) {
                 cell.mass = cell.mass/2;
@@ -439,9 +444,9 @@ io.on('connection', function (socket) {
         }
 
         if(currentPlayer.cells.length < conf.limitSplit && currentPlayer.massTotal >= conf.defaultPlayerMass*2) {
-            //Split single cell from virus
-            if(virusCell) {
-              splitCell(currentPlayer.cells[virusCell]);
+            //Split single cell from spider
+            if(spiderCell) {
+              splitCell(currentPlayer.cells[spiderCell]);
             }
             else {
               //Split all cells
@@ -459,7 +464,7 @@ io.on('connection', function (socket) {
 
 function tickPlayer(currentPlayer) {
     if(currentPlayer.lastHeartbeat < new Date().getTime() - conf.maxHeartbeatInterval) {
-        sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + conf.maxHeartbeatInterval + ' ago.');
+        sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + conf.maxHeartbeatInterval/1000.0 + ' seconds ago.');
         sockets[currentPlayer.id].disconnect();
     }
 
@@ -544,11 +549,11 @@ function tickPlayer(currentPlayer) {
         var massEaten = massFood.map(eatMass)
             .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
 
-        var virusCollision = virus.map(funcFood)
+        var spiderCollision = spiders.map(funcFood)
            .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
 
-        if(virusCollision > 0 && currentCell.mass > virus[virusCollision].mass) {
-          sockets[currentPlayer.id].emit('virusSplit', z);
+        if(spiderCollision > 0 && currentCell.mass > spiders[spiderCollision].mass) {
+          sockets[currentPlayer.id].emit('spiderSplit', z);
         }
 
         var masaGanada = 0;
@@ -586,12 +591,33 @@ function tickMouse(mouse)
 {
   var dx = -conf.mouse.speed * Math.sin(mouse.direction);
   var dy = conf.mouse.speed * Math.cos(mouse.direction);
-  if (mouse.x + dx > conf.gameWidth || mouse.y + dy > conf.gameHeight || mouse.x + dx < 0 || mouse.y + dy < 0) 
+  if (mouse.x + dx > conf.gameWidth || mouse.y + dy > conf.gameHeight || mouse.x + dx < 0 || mouse.y + dy < 0)
   {
     mouse.direction += 0.5;
   } else {
     mouse.x += dx;
     mouse.y += dy;
+  }
+
+  // id: ((new Date()).getTime() + '' + mice.length) >>> 0,
+  //           x: position.x,
+  //           y: position.y,
+  //           radius: radius,
+  //           mass: Math.random() + 2,
+  //           hue: Math.round(Math.random() * 360),
+  //           direction: Math.random() * 360
+}
+
+function tickSpider(spider)
+{
+  var dx = -conf.spider.speed * Math.sin(spider.direction);
+  var dy = conf.spider.speed * Math.cos(spider.direction);
+  if (spider.x + dx > conf.gameWidth || spider.y + dy > conf.gameHeight || spider.x + dx < 0 || spider.y + dy < 0)
+  {
+    spider.direction += 0.5;
+  } else {
+    spider.x += dx;
+    spider.y += dy;
   }
 
   // id: ((new Date()).getTime() + '' + mice.length) >>> 0,
@@ -609,6 +635,9 @@ function moveloop() {
     }
     for (i = 0; i < mice.length; i++) {
         tickMouse(mice[i]);
+    }
+    for (i = 0; i < spiders.length; i++) {
+        tickSpider(spiders[i]);
     }
     for (i = 0; i < massFood.length; i++) {
         if(massFood[i].speed > 0) moveMass(massFood[i]);
@@ -672,12 +701,12 @@ function sendUpdates() {
             })
             .filter(function(f) { return f; });
 
-        var visibleVirus  = virus
+        var visibleSpiders  = spiders
             .map(function(f) {
-                if ( f.x > u.x - u.screenWidth/2 - f.radius &&
-                    f.x < u.x + u.screenWidth/2 + f.radius &&
-                    f.y > u.y - u.screenHeight/2 - f.radius &&
-                    f.y < u.y + u.screenHeight/2 + f.radius) {
+                if ( f.x > u.x - u.screenWidth/2&& //- f.radius &&
+                    f.x < u.x + u.screenWidth/2&& //+ f.radius &&
+                    f.y > u.y - u.screenHeight/2&& //- f.radius &&
+                    f.y < u.y + u.screenHeight/2){ // + f.radius) {
                     return f;
                 }
             })
@@ -728,7 +757,7 @@ function sendUpdates() {
             })
             .filter(function(f) { return f; });
 
-        sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleVirus);
+        sockets[u.id].emit('serverTellPlayerMove', visibleCells, visibleFood, visibleMass, visibleSpiders);
         if (leaderboardChanged) {
             sockets[u.id].emit('leaderboard', {
                 players: users.length,

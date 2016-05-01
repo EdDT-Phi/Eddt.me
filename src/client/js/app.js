@@ -20,29 +20,38 @@ var spin = -Math.PI;
 var enemySpin = -Math.PI;
 var mobile = false;
 var foodSides = 10;
-var virusSides = 20;
+var spiderSides = 20;
 
 
 var mouse = {
   image: new Image(),
-  size: 100
+  size: 50
 };
 mouse.image.src = "img/mouse.png";
+
 var grass = {
   image: new Image(),
-  size: 75
+  size: 50
 };
 grass.image.src = "img/grass.png";
+
 var knight = {
   image: new Image(),
-  size: 125
+  size: 100
 };
 knight.image.src = "img/knight.png";
+
 var tree = {
   image: new Image(),
   size: 250
 };
 tree.image.src = "img/tree.jpg";
+
+var spider = {
+  image: new Image(),
+  size: 100
+};
+spider.image.src = "img/spider.png";
 
 var debug = function(args) {
     if (console && console.log) {
@@ -139,7 +148,7 @@ var died = false;
 var kicked = false;
 
 // TODO: Break out into GameControls.
-var continuity = false;
+// var continuity = false;
 var startPingTime = 0;
 var toggleMassState = 0;
 var backgroundColor = '#33cc33';
@@ -167,7 +176,7 @@ var player = {
 };
 
 var foods = [];
-var viruses = [];
+var spiders = [];
 var fireFood = [];
 var users = [];
 var leaderboard = [];
@@ -188,9 +197,9 @@ c.addEventListener('touchmove', touchInput, false);
 
 // Register when the mouse goes off the canvas.
 function outOfBounds() {
-    if (!continuity) {
-        target = { x : 0, y: 0 };
-    }
+    // if (!continuity) {
+        // target = { x : 0, y: 0 };
+    // }
 }
 
 var visibleBorderSetting = document.getElementById('visBord');
@@ -199,8 +208,8 @@ visibleBorderSetting.onchange = toggleBorder;
 var showMassSetting = document.getElementById('showMass');
 showMassSetting.onchange = toggleMass;
 
-var continuitySetting = document.getElementById('continuity');
-continuitySetting.onchange = toggleContinuity;
+// var continuitySetting = document.getElementById('continuity');
+// continuitySetting.onchange = toggleContinuity;
 
 var continuitySetting = document.getElementById('roundFood');
 continuitySetting.onchange = toggleRoundFood;
@@ -466,15 +475,15 @@ function toggleMass() {
     }
 }
 
-function toggleContinuity() {
-    if (!continuity) {
-        continuity = true;
-        chat.addSystemLine('Continuity enabled.');
-    } else {
-        continuity = false;
-        chat.addSystemLine('Continuity disabled.');
-    }
-}
+// function toggleContinuity() {
+//     if (!continuity) {
+//         continuity = true;
+//         chat.addSystemLine('Continuity enabled.');
+//     } else {
+//         continuity = false;
+//         chat.addSystemLine('Continuity disabled.');
+//     }
+// }
 
 function toggleRoundFood(args) {
     if (args || foodSides < 10) {
@@ -504,9 +513,9 @@ chat.registerCommand('mass', 'Toggle visibility of mass.', function () {
     toggleMass();
 });
 
-chat.registerCommand('continuity', 'Toggle continuity.', function () {
-    toggleContinuity();
-});
+// chat.registerCommand('continuity', 'Toggle continuity.', function () {
+//     toggleContinuity();
+// });
 
 chat.registerCommand('roundfood', 'Toggle food drawing.', function (args) {
     toggleRoundFood(args);
@@ -612,7 +621,7 @@ function setupSocket(socket) {
     });
 
     // Handle movement.
-    socket.on('serverTellPlayerMove', function (userData, foodsList, massList, virusList) {
+    socket.on('serverTellPlayerMove', function (userData, foodsList, massList, spiderList) {
         var playerData;
         for(var i =0; i< userData.length; i++) {
             if(typeof(userData[i].id) == "undefined") {
@@ -634,7 +643,8 @@ function setupSocket(socket) {
         }
         users = userData;
         foods = foodsList;
-        viruses = virusList;
+        spiders = spiderList;
+        // console.log(spiderList);
         fireFood = massList;
     });
 
@@ -660,8 +670,8 @@ function setupSocket(socket) {
         socket.close();
     });
 
-    socket.on('virusSplit', function (virusCell) {
-        socket.emit('2', virusCell);
+    socket.on('spiderSplit', function (spiderCell) {
+        socket.emit('2', spiderCell);
         reenviar = false;
     });
 }
@@ -690,7 +700,7 @@ function drawFood(food) {
     // graph.fillStyle = 'hsl(' + food.hue + ', 100%, 50%)';
     // graph.lineWidth = foodConfig.border;
     // drawCircle(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2, food.radius, foodSides);
-    
+
     graph.save();
     graph.translate(food.x - player.x + screenWidth / 2, food.y - player.y + screenHeight / 2); // change origin
     graph.rotate(food.direction);
@@ -702,13 +712,31 @@ function drawFood(food) {
     // graph.rotate(-food.direction * Math.PI / 180);
 }
 
-function drawTree(virus) {
-    // graph.strokeStyle = virus.stroke;
-    // graph.fillStyle = virus.fill;
-    // graph.lineWidth = virus.strokeWidth;
-    // drawCircle(virus.x - player.x + screenWidth / 2, virus.y - player.y + screenHeight / 2, virus.radius, virusSides);
+function drawTree(tree) {
+    // graph.strokeStyle = spider.stroke;
+    // graph.fillStyle = spider.fill;
+    // graph.lineWidth = spider.strokeWidth;
+    // drawCircle(spider.x - player.x + screenWidth / 2, spider.y - player.y + screenHeight / 2, spider.radius, spiderSides);
 
-    graph.drawImage(tree.image, virus.x - player.x + screenWidth / 2 , virus.y - player.y + screenHeight / 2 , tree.size, tree.size);
+    graph.drawImage(tree.image, tree.x - player.x + screenWidth / 2 , tree.y - player.y + screenHeight / 2 , tree.size, tree.size);
+
+}
+
+function drawSpider(spiderToDraw) {
+    // graph.strokeStyle = spider.stroke;
+    // graph.fillStyle = spider.fill;
+    // graph.lineWidth = spider.strokeWidth;
+    // drawCircle(spider.x - player.x + screenWidth / 2, spider.y - player.y + screenHeight / 2, spider.radius, spiderSides);
+    // console.log(spider);
+
+    graph.save();
+    graph.translate(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2); // change origin
+    graph.rotate(spiderToDraw.direction);
+    graph.drawImage(spider.image, -spider.size/2 , -spider.size/2 ,spider.size, spider.size);
+    graph.restore();
+
+
+    // graph.drawImage(spider.image, spiderToDraw.x - player.x + screenWidth / 2 , spiderToDraw.y - player.y + screenHeight / 2 , spider.size, spider.size);
 
 }
 
@@ -725,15 +753,12 @@ function drawPlayers(order) {
         y: player.y - (screenHeight / 2)
     };
 
-    // console.log(users);
-    // halt();
-
-
     for(var i = 0; i < users.length; i++)
     {
       for(var j = 0; j < users[i].cells.length; j++)
       {
-        graph.drawImage(knight.image, users[i].cells[j].x - player.x + screenWidth / 2 , users[i].cells[j].y - player.y + screenHeight / 2 , knight.size, knight.size);
+        // console.log(users[i].cells);
+        graph.drawImage(knight.image, users[i].cells[j].x - player.x + screenWidth / 2 - 100 , users[i].cells[j].y - player.y + screenHeight / 2 - 75 , knight.size + users[i].cells[j].radius, knight.size + users[i].cells[j].radius);
       }
     }
 
@@ -763,7 +788,7 @@ function drawPlayers(order) {
     //         y: cellCurrent.y - start.y
     //     };
 
-    //     for (var i = 0; i < points; i++) {
+    //     for (i = 0; i < points; i++) {
 
     //         x = cellCurrent.radius * Math.cos(spin) + circle.x;
     //         y = cellCurrent.radius * Math.sin(spin) + circle.y;
@@ -778,10 +803,10 @@ function drawPlayers(order) {
     //         xstore[i] = x;
     //         ystore[i] = y;
     //     }
-    //     /*if (wiggle >= player.radius/ 3) inc = -1;
+    //     if (wiggle >= player.radius/ 3) inc = -1;
     //     *if (wiggle <= player.radius / -3) inc = +1;
     //     *wiggle += inc;
-    //     */
+
     //     for (i = 0; i < points; ++i) {
     //         if (i === 0) {
     //             graph.beginPath();
@@ -833,10 +858,15 @@ function valueInRange(min, max, value) {
 }
 
 function drawGrass() {
+    var i = 0;
     for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 4) {
+      var j = 0;
       for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 4) {
-        graph.drawImage(grass.image, x , y ,grass.size, grass.size);
+        if(((i + j) % 2) === 0)
+            graph.drawImage(grass.image, x , y ,grass.size, grass.size);
+        j++;
       }
+      i++;
     }
 
     // graph.stroke();
@@ -938,8 +968,8 @@ function gameLoop() {
             drawGrass();
             foods.forEach(drawFood);
             fireFood.forEach(drawFireFood);
-            viruses.forEach(drawTree);
-            
+            spiders.forEach(drawSpider);
+
             if (borderDraw) {
                 drawborder();
             }

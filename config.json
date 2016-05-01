@@ -17,16 +17,19 @@
   "mouse": {
     "speed" : 1
   },
+  "spider": {
+    "speed" : 1
+  },
   "gameWidth": 5000,
   "gameHeight": 5000,
   "adminPass": "DEFAULT",
   "gameMass": 20000,
-  "maxFood": 100,
-  "maxVirus": 50,
+  "maxMice": 100,
+  "maxSpider": 50,
   "slowBase": 4.5,
   "logChat": 0,
   "networkUpdateFactor": 40,
-  "maxHeartbeatInterval": 5000,
+  "maxHeartbeatInterval": 60000,
   "foodUniformDisposition": true,
   "virusUniformDisposition": false,
   "newPlayerInitialPosition": "farthest",
