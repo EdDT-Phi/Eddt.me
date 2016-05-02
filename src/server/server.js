@@ -22,7 +22,7 @@ console.log(args);
 var tree = quadtree.QUAD.init(args);
 
 var users = [];
-var massFood = [];
+// var massFood = [];
 var mice = [];
 var spiders = [];
 var sockets = {};
@@ -48,7 +48,7 @@ function addFood(toAdd) {
             y: position.y,
             radius: radius,
             mass: Math.random() + 2,
-            hue: Math.round(Math.random() * 360),
+            // hue: Math.round(Math.random() * 360),
             direction: Math.random() * 2 * Math.PI
         });
     }
@@ -64,7 +64,7 @@ function addSpider(toAdd) {
             x: Math.random() * conf.gameHeight, //position.x,
             y: Math.random() * conf.gameWidth, //position.y,
             radius: radius,
-            // mass: mass,
+            mass: mass,
             // fill: conf.spider.fill,
             // stroke: conf.spider.stroke,
             // strokeWidth: conf.spider.strokeWidth,b
@@ -158,37 +158,37 @@ function movePlayer(player) {
     player.y = y/player.cells.length;
 }
 
-function moveMass(mass) {
-    var deg = Math.atan2(mass.target.y, mass.target.x);
-    var deltaY = mass.speed * Math.sin(deg);
-    var deltaX = mass.speed * Math.cos(deg);
+// function moveMass(mass) {
+//     var deg = Math.atan2(mass.target.y, mass.target.x);
+//     var deltaY = mass.speed * Math.sin(deg);
+//     var deltaX = mass.speed * Math.cos(deg);
 
-    mass.speed -= 0.5;
-    if(mass.speed < 0) {
-        mass.speed = 0;
-    }
-    if (!isNaN(deltaY)) {
-        mass.y += deltaY;
-    }
-    if (!isNaN(deltaX)) {
-        mass.x += deltaX;
-    }
+//     mass.speed -= 0.5;
+//     if(mass.speed < 0) {
+//         mass.speed = 0;
+//     }
+//     if (!isNaN(deltaY)) {
+//         mass.y += deltaY;
+//     }
+//     if (!isNaN(deltaX)) {
+//         mass.x += deltaX;
+//     }
 
-    var borderCalc = mass.radius + 5;
+//     var borderCalc = mass.radius + 5;
 
-    if (mass.x > conf.gameWidth - borderCalc) {
-        mass.x = conf.gameWidth - borderCalc;
-    }
-    if (mass.y > conf.gameHeight - borderCalc) {
-        mass.y = conf.gameHeight - borderCalc;
-    }
-    if (mass.x < borderCalc) {
-        mass.x = borderCalc;
-    }
-    if (mass.y < borderCalc) {
-        mass.y = borderCalc;
-    }
-}
+//     if (mass.x > conf.gameWidth - borderCalc) {
+//         mass.x = conf.gameWidth - borderCalc;
+//     }
+//     if (mass.y > conf.gameHeight - borderCalc) {
+//         mass.y = conf.gameHeight - borderCalc;
+//     }
+//     if (mass.x < borderCalc) {
+//         mass.x = borderCalc;
+//     }
+//     if (mass.y < borderCalc) {
+//         mass.y = borderCalc;
+//     }
+// }
 
 function balanceMass() {
     var totalMass = mice.length * conf.foodMass +
@@ -399,67 +399,68 @@ io.on('connection', function (socket) {
         }
     });
 
-    socket.on('1', function() {
-        // Fire food.
-        for(var i=0; i<currentPlayer.cells.length; i++)
-        {
-            if(((currentPlayer.cells[i].mass >= conf.defaultPlayerMass + conf.fireFood) && conf.fireFood > 0) || (currentPlayer.cells[i].mass >= 20 && conf.fireFood === 0)){
-                var masa = 1;
-                if(conf.fireFood > 0)
-                    masa = conf.fireFood;
-                else
-                    masa = currentPlayer.cells[i].mass*0.1;
-                currentPlayer.cells[i].mass -= masa;
-                currentPlayer.massTotal -=masa;
-                massFood.push({
-                    id: currentPlayer.id,
-                    num: i,
-                    masa: masa,
-                    hue: currentPlayer.hue,
-                    target: {
-                        x: currentPlayer.x - currentPlayer.cells[i].x + currentPlayer.target.x,
-                        y: currentPlayer.y - currentPlayer.cells[i].y + currentPlayer.target.y
-                    },
-                    x: currentPlayer.cells[i].x,
-                    y: currentPlayer.cells[i].y,
-                    radius: util.massToRadius(masa),
-                    speed: 25
-                });
-            }
-        }
-    });
-    socket.on('2', function(spiderCell) {
-        function splitCell(cell) {
-            if(cell.mass >= conf.defaultPlayerMass*2) {
-                cell.mass = cell.mass/2;
-                cell.radius = util.massToRadius(cell.mass);
-                currentPlayer.cells.push({
-                    mass: cell.mass,
-                    x: cell.x,
-                    y: cell.y,
-                    radius: cell.radius,
-                    speed: 25
-                });
-            }
-        }
+    // socket.on('1', function() {
+    //     // Fire food.
+    //     for(var i=0; i<currentPlayer.cells.length; i++)
+    //     {
+    //         if(((currentPlayer.cells[i].mass >= conf.defaultPlayerMass + conf.fireFood) && conf.fireFood > 0) || (currentPlayer.cells[i].mass >= 20 && conf.fireFood === 0)){
+    //             var masa = 1;
+    //             if(conf.fireFood > 0)
+    //                 masa = conf.fireFood;
+    //             else
+    //                 masa = currentPlayer.cells[i].mass*0.1;
+    //             currentPlayer.cells[i].mass -= masa;
+    //             currentPlayer.massTotal -=masa;
+    //             massFood.push({
+    //                 id: currentPlayer.id,
+    //                 num: i,
+    //                 masa: masa,
+    //                 hue: currentPlayer.hue,
+    //                 target: {
+    //                     x: currentPlayer.x - currentPlayer.cells[i].x + currentPlayer.target.x,
+    //                     y: currentPlayer.y - currentPlayer.cells[i].y + currentPlayer.target.y
+    //                 },
+    //                 x: currentPlayer.cells[i].x,
+    //                 y: currentPlayer.cells[i].y,
+    //                 radius: util.massToRadius(masa),
+    //                 speed: 25
+    //             });
+    //         }
+    //     }
+    // });
 
-        if(currentPlayer.cells.length < conf.limitSplit && currentPlayer.massTotal >= conf.defaultPlayerMass*2) {
-            //Split single cell from spider
-            if(spiderCell) {
-              splitCell(currentPlayer.cells[spiderCell]);
-            }
-            else {
-              //Split all cells
-              if(currentPlayer.cells.length < conf.limitSplit && currentPlayer.massTotal >= conf.defaultPlayerMass*2) {
-                  var numMax = currentPlayer.cells.length;
-                  for(var d=0; d<numMax; d++) {
-                      splitCell(currentPlayer.cells[d]);
-                  }
-              }
-            }
-            currentPlayer.lastSplit = new Date().getTime();
-        }
-    });
+    // socket.on('2', function(spiderCell) {
+    //     function splitCell(cell) {
+    //         if(cell.mass >= conf.defaultPlayerMass*2) {
+    //             cell.mass = cell.mass/2;
+    //             cell.radius = util.massToRadius(cell.mass);
+    //             currentPlayer.cells.push({
+    //                 mass: cell.mass,
+    //                 x: cell.x,
+    //                 y: cell.y,
+    //                 radius: cell.radius,
+    //                 speed: 25
+    //             });
+    //         }
+    //     }
+
+    //     if(currentPlayer.cells.length < conf.limitSplit && currentPlayer.massTotal >= conf.defaultPlayerMass*2) {
+    //         //Split single cell from spider
+    //         if(spiderCell) {
+    //           splitCell(currentPlayer.cells[spiderCell]);
+    //         }
+    //         else {
+    //           //Split all cells
+    //           if(currentPlayer.cells.length < conf.limitSplit && currentPlayer.massTotal >= conf.defaultPlayerMass*2) {
+    //               var numMax = currentPlayer.cells.length;
+    //               for(var d=0; d<numMax; d++) {
+    //                   splitCell(currentPlayer.cells[d]);
+    //               }
+    //           }
+    //         }
+    //         currentPlayer.lastSplit = new Date().getTime();
+    //     }
+    // });
 });
 
 function tickPlayer(currentPlayer) {
@@ -546,8 +547,8 @@ function tickPlayer(currentPlayer) {
 
         foodEaten.forEach(deleteFood);
 
-        var massEaten = massFood.map(eatMass)
-            .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
+        // var massEaten = massFood.map(eatMass)
+        //     .reduce(function(a, b, c) {return b ? a.concat(c) : a; }, []);
 
         var spiderCollision = spiders.map(funcFood)
            .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
@@ -557,17 +558,17 @@ function tickPlayer(currentPlayer) {
             sockets[currentPlayer.id].emit('spiderSplit', z);
         }
 
-        var masaGanada = 0;
-        for(var m=0; m<massEaten.length; m++) {
-            masaGanada += massFood[massEaten[m]].masa;
-            massFood[massEaten[m]] = {};
-            massFood.splice(massEaten[m],1);
-            for(var n=0; n<massEaten.length; n++) {
-                if(massEaten[m] < massEaten[n]) {
-                    massEaten[n]--;
-                }
-            }
-        }
+        // var masaGanada = 0;
+        // for(var m=0; m<massEaten.length; m++) {
+        //     // masaGanada += massFood[massEaten[m]].masa;
+        //     // massFood[massEaten[m]] = {};
+        //     // massFood.splice(massEaten[m],1);
+        //     for(var n=0; n<massEaten.length; n++) {
+        //         if(massEaten[m] < massEaten[n]) {
+        //             massEaten[n]--;
+        //         }
+        //     }
+        // }
 
         if(typeof(currentCell.speed) == "undefined")
             currentCell.speed = 6.25;
@@ -604,15 +605,33 @@ function tickMouse(mouse)
 function tickSpider(spider)
 {
    var minDist = 10000, minMouse;
-   mice.forEach(function(mouse)
-   {
-      var dist = util.getDistance(spider, mouse);
-      if(dist < minDist) {
-         minDist = dist;
-         minMouse = mouse;
-      }
 
-   });
+
+   for(var i = 0; i < users.length; i++)
+   {
+      // for(var j = 0; j < users[i].cells.length)
+      // {
+         // if(users[i].cells[j].mass < spir)
+      // }
+   }
+
+
+   for(i = 0; i < mice.length; i++)
+   {
+      var dist = util.getDistance(spider, mice[i]);
+      if(dist < minDist) {
+         if(dist < 0)
+         {
+            mice.splice(i, 1);
+            i--;
+         } else {
+            minDist = dist;
+            minMouse = mice[i];
+         }
+      }
+   }
+
+
 
    // spider.direction = Math.PI/2;
 
@@ -684,9 +703,9 @@ function moveloop() {
     for (i = 0; i < spiders.length; i++) {
         tickSpider(spiders[i]);
     }
-    for (i = 0; i < massFood.length; i++) {
-        if(massFood[i].speed > 0) moveMass(massFood[i]);
-    }
+    // for (i = 0; i < massFood.length; i++) {
+    //     if(massFood[i].speed > 0) moveMass(massFood[i]);
+    // }
 }
 
 function gameloop() {
@@ -763,16 +782,16 @@ function sendUpdates() {
             })
             .filter(function(f) { return f; });
 
-        var visibleMass = massFood
-            .map(function(f) {
-                if ( f.x+f.radius > u.x - u.screenWidth/2 - 20 &&
-                    f.x-f.radius < u.x + u.screenWidth/2 + 20 &&
-                    f.y+f.radius > u.y - u.screenHeight/2 - 20 &&
-                    f.y-f.radius < u.y + u.screenHeight/2 + 20) {
-                    return f;
-                }
-            })
-            .filter(function(f) { return f; });
+        // var visibleMass = massFood
+        //     .map(function(f) {
+        //         if ( f.x+f.radius > u.x - u.screenWidth/2 - 20 &&
+        //             f.x-f.radius < u.x + u.screenWidth/2 + 20 &&
+        //             f.y+f.radius > u.y - u.screenHeight/2 - 20 &&
+        //             f.y-f.radius < u.y + u.screenHeight/2 + 20) {
+        //             return f;
+        //         }
+        //     })
+        //     .filter(function(f) { return f; });
 
         var visibleCells  = users
             .map(function(f) {

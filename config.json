@@ -15,16 +15,16 @@
 		"splitMass": 180
 	},
   "mouse": {
-    "speed" : 0.5
+    "speed" : 1
   },
   "spider": {
-    "speed" : 0.5
+    "speed" : 2
   },
   "gameWidth": 5000,
   "gameHeight": 5000,
   "adminPass": "DEFAULT",
   "gameMass": 20000,
-  "maxMice": 100,
+  "maxMice": 500,
   "maxSpider": 50,
   "slowBase": 4.5,
   "logChat": 0,
