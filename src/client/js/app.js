@@ -621,14 +621,14 @@ function setupSocket(socket) {
     });
 
     // Handle movement.
-    socket.on('serverTellPlayerMove', function (userData, foodsList, massList, spiderList) {
-        var playerData;
-        for(var i =0; i< userData.length; i++) {
-            if(typeof(userData[i].id) == "undefined") {
-                playerData = userData[i];
-                i = userData.length;
-            }
-        }
+    socket.on('serverTellPlayerMove', function (usersData, playerData, foodsList, spiderList) {
+        // var playerData;
+        // for(var i =0; i< usersData.length; i++) {
+        //     if(typeof(usersData[i].id) == "undefined") {
+        //         playerData = usersData[i];
+        //         i = usersData.length;
+        //     }
+        // }
         if(playerType == 'player') {
             var xoffset = player.x - playerData.x;
             var yoffset = player.y - playerData.y;
@@ -641,11 +641,11 @@ function setupSocket(socket) {
             player.xoffset = isNaN(xoffset) ? 0 : xoffset;
             player.yoffset = isNaN(yoffset) ? 0 : yoffset;
         }
-        users = userData;
+        users = usersData;
         foods = foodsList;
         spiders = spiderList;
         // console.log(spiderList);
-        fireFood = massList;
+        // fireFood = massList;
     });
 
     // Death.
@@ -748,18 +748,18 @@ function drawFireFood(mass) {
 }
 
 function drawPlayers(order) {
-    var start = {
-        x: player.x - (screenWidth / 2),
-        y: player.y - (screenHeight / 2)
-    };
+    // var start = {
+    //     x: player.x - (screenWidth / 2),
+    //     y: player.y - (screenHeight / 2)
+    // };
 
     for(var i = 0; i < users.length; i++)
     {
-      for(var j = 0; j < users[i].cells.length; j++)
-      {
+      // for(var j = 0; j < users[i].cells.length; j++)
+      // {
         // console.log(users[i].cells);
-        graph.drawImage(knight.image, users[i].cells[j].x - player.x + screenWidth / 2 - 100 , users[i].cells[j].y - player.y + screenHeight / 2 - 75 , knight.size + users[i].cells[j].radius, knight.size + users[i].cells[j].radius);
-      }
+      graph.drawImage(knight.image, users[i].x - player.x + screenWidth / 2 - 100 , users[i].y - player.y + screenHeight / 2 - 75 , knight.size + users[i].radius, knight.size + users[i].radius);
+      // }
     }
 
 
