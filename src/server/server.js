@@ -83,85 +83,86 @@ function movePlayer(player) {
     // var x =0,y =0;
     // for(var i=0; i< player.cells.length; i++)
     // {
-      console.log("moving player: ", player);
-        var target = {
-            x: player.x + player.target.x,
-            // x: player.x - player.cells[i].x + player.target.x,
-            y: player.y + player.target.y
-            // y: player.y - player.cells[i].y + player.target.y
-        };
-        var dist = Math.sqrt(Math.pow(target.y, 2) + Math.pow(target.x, 2));
-        var deg = Math.atan2(target.y, target.x);
-        var slowDown = 1;
-        if(player.speed <= 6.25) {
-            slowDown = util.log(player.mass, conf.slowBase) - initMassLog + 1;
-        }
+   // console.log("moving player: ", player.x, player.y, player.target);
+   // var target = {
+   //    x: player.x - player.target.x,
+   //    // x: player.x - player.cells[i].x + player.target.x,
+   //    y: player.y - player.target.y
+   //    // y: player.y - player.cells[i].y + player.target.y
+   // };
+   var dist = Math.sqrt(Math.pow(player.target.y, 2) + Math.pow(player.target.x, 2));
+   var deg = Math.atan2(player.target.y, player.target.x);
+   var slowDown = 1;
+   if(player.speed <= 6.25) {
+      slowDown = util.log(player.mass, conf.slowBase) - initMassLog + 1;
+   }
 
-        var deltaY = player.speed * Math.sin(deg)/ slowDown;
-        var deltaX = player.speed * Math.cos(deg)/ slowDown;
+   var deltaY = player.speed * Math.sin(deg)/ slowDown;
+   var deltaX = player.speed * Math.cos(deg)/ slowDown;
 
-        if(player.speed > 6.25) {
-            player.speed -= 0.5;
-        }
-        if (dist < (50 + player.radius)) {
-            deltaY *= dist / (50 + player.radius);
-            deltaX *= dist / (50 + player.radius);
-        }
-        if (!isNaN(deltaY)) {
-            player.y += deltaY;
-        } else {
-         console.log("why");
-        }
-        if (!isNaN(deltaX)) {
-            player.x += deltaX;
-        }
-        // Find best solution.
-        // for(var j=0; j<player.cells.length; j++) {
-        //     if(j != i && player !== undefined) {
-        //         var distance = Math.sqrt(Math.pow(player.y-player.y,2) + Math.pow(player.x-player.x,2));
-        //         var radiusTotal = (player.radius + player.radius);
-        //         if(distance < radiusTotal) {
-        //             if(player.lastSplit > new Date().getTime() - 1000 * conf.mergeTimer) {
-        //                 if(player.x < player.x) {
-        //                     player.x--;
-        //                 } else if(player.x > player.x) {
-        //                     player.x++;
-        //                 }
-        //                 if(player.y < player.y) {
-        //                     player.y--;
-        //                 } else if((player.y > player.y)) {
-        //                     player.y++;
-        //                 }
-        //             }
-        //             else if(distance < radiusTotal / 1.75) {
-        //                 player.mass += player.mass;
-        //                 player.radius = util.massToRadius(player.mass);
-        //                 player.cells.splice(j, 1);
-        //             }
-        //         }
-        //     }
-        // }
+   // console.log({dX:deltaX, dY: deltaY});
 
-        // if(player.length > i) {
-         var borderCalc = player.radius / 3;
-         if (player.x > conf.gameWidth - borderCalc) {
-             player.x = conf.gameWidth - borderCalc;
-         }
-         if (player.y > conf.gameHeight - borderCalc) {
-             player.y = conf.gameHeight - borderCalc;
-         }
-         if (player.x < borderCalc) {
-             player.x = borderCalc;
-         }
-         if (player.y < borderCalc) {
-             player.y = borderCalc;
-         }
+   if(player.speed > 6.25) {
+      player.speed -= 0.5;
+   }
+   if (dist < (50 + player.radius)) {
+      deltaY *= dist / (50 + player.radius);
+      deltaX *= dist / (50 + player.radius);
+   }
+   if (!isNaN(deltaY)) {
+      player.y += deltaY;
+   }
+   if (!isNaN(deltaX)) {
+      player.x += deltaX;
+   }
+   // Find best solution.
+   // for(var j=0; j<player.cells.length; j++) {
+   //     if(j != i && player !== undefined) {
+   //         var distance = Math.sqrt(Math.pow(player.y-player.y,2) + Math.pow(player.x-player.x,2));
+   //         var radiusTotal = (player.radius + player.radius);
+   //         if(distance < radiusTotal) {
+   //             if(player.lastSplit > new Date().getTime() - 1000 * conf.mergeTimer) {
+   //                 if(player.x < player.x) {
+   //                     player.x--;
+   //                 } else if(player.x > player.x) {
+   //                     player.x++;
+   //                 }
+   //                 if(player.y < player.y) {
+   //                     player.y--;
+   //                 } else if((player.y > player.y)) {
+   //                     player.y++;
+   //                 }
+   //             }
+   //             else if(distance < radiusTotal / 1.75) {
+   //                 player.mass += player.mass;
+   //                 player.radius = util.massToRadius(player.mass);
+   //                 player.cells.splice(j, 1);
+   //             }
+   //         }
+   //     }
+   // }
+
+   // if(player.length > i) {
+   var borderCalc = player.radius / 3;
+   if (player.x > conf.gameWidth - borderCalc) {
+       player.x = conf.gameWidth - borderCalc;
+   }
+   if (player.y > conf.gameHeight - borderCalc) {
+       player.y = conf.gameHeight - borderCalc;
+   }
+   if (player.x < borderCalc) {
+       player.x = borderCalc;
+   }
+   if (player.y < borderCalc) {
+       player.y = borderCalc;
+   }
          // x += player.x;
          // y += player.y;
         // }
     // }
     // player.x = x/player.length;
     // player.y = y/player.length;
+   // console.log("moved player: ", player.x, player.y);
 }
 
 // function moveMass(mass) {
@@ -240,12 +241,12 @@ io.on('connection', function (socket) {
     var cells = [];
     var massTotal = 0;
     if(type === 'player') {
-        cells = [{
-            mass: conf.defaultPlayerMass,
-            x: position.x,
-            y: position.y,
-            radius: radius
-        }];
+        // cells = [{
+        //     mass: conf.defaultPlayerMass,
+        //     x: position.x,
+        //     y: position.y,
+        //     radius: radius
+        // }];
         massTotal = conf.defaultPlayerMass;
     }
 
@@ -253,7 +254,7 @@ io.on('connection', function (socket) {
         id: socket.id,
         x: position.x,
         y: position.y,
-        cells: cells,
+        // cells: cells,
         massTotal: massTotal,
         hue: Math.round(Math.random() * 360),
         type: type,
@@ -284,6 +285,7 @@ io.on('connection', function (socket) {
             player.y = position.y;
             player.target.x = 0;
             player.target.y = 0;
+            player.speed = 5;
             if(type === 'player') {
                 // player.cells = [{
                 //     mass: conf.defaultPlayerMass,
@@ -306,6 +308,8 @@ io.on('connection', function (socket) {
             // player.hue = Math.round(Math.random() * 360);
             player.lastHeartbeat = new Date().getTime();
             users.push(player);
+
+            currentPlayer = player;
 
             io.emit('playerJoin', { name: player.name });
 
@@ -404,6 +408,7 @@ io.on('connection', function (socket) {
     // Heartbeat function, update everytime.
     socket.on('0', function(target) {
         currentPlayer.lastHeartbeat = new Date().getTime();
+        // console.log(target);
         if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
             currentPlayer.target = target;
         }
@@ -492,35 +497,35 @@ function tickPlayer(currentPlayer) {
 
     function eatMass(m) {
         if(SAT.pointInCircle(new V(m.x, m.y), playerCircle)){
-            if(m.id == currentPlayer.id && m.speed > 0 && z == m.num)
+            if(m.id == currentPlayer.id && m.speed > 0)// && z == m.num)
                 return false;
-            if(currentCell.mass > m.masa * 1.1)
+            if(currentPlayer.mass > m.masa * 1.1)
                 return true;
         }
         return false;
     }
 
     function check(user) {
-        for(var i=0; i<user.cells.length; i++) {
-            if(user.cells[i].mass > 10 && user.id !== currentPlayer.id) {
+        // for(var i=0; i<user.cells.length; i++) {
+            if(user.mass > 10 && user.id !== currentPlayer.id) {
                 var response = new SAT.Response();
                 var collided = SAT.testCircleCircle(playerCircle,
-                    new C(new V(user.cells[i].x, user.cells[i].y), user.cells[i].radius),
+                    new C(new V(user.x, user.y), user.radius),
                     response);
                 if (collided) {
-                    response.aUser = currentCell;
+                    response.aUser = currentPlayer;
                     response.bUser = {
                         id: user.id,
                         name: user.name,
-                        x: user.cells[i].x,
-                        y: user.cells[i].y,
-                        num: i,
-                        mass: user.cells[i].mass
+                        x: user.x,
+                        y: user.y,
+                        // num: i,
+                        mass: user.mass
                     };
                     playerCollisions.push(response);
                 }
             }
-        }
+        // }
     }
 
     function collisionCheck(collision) {
@@ -531,26 +536,26 @@ function tickPlayer(currentPlayer) {
 
             var numUser = util.findIndex(users, collision.bUser.id);
             if (numUser > -1) {
-                if(users[numUser].cells.length > 1) {
-                    users[numUser].massTotal -= collision.bUser.mass;
-                    users[numUser].cells.splice(collision.bUser.num, 1);
-                } else {
+                // if(users[numUser].cells.length > 1) {
+                //     users[numUser].massTotal -= collision.bUser.mass;
+                //     users[numUser].cells.splice(collision.bUser.num, 1);
+                // } else {
                     users.splice(numUser, 1);
                     io.emit('playerDied', { name: collision.bUser.name });
                     sockets[collision.bUser.id].emit('RIP');
-                }
+                // }
             }
             currentPlayer.massTotal += collision.bUser.mass;
             collision.aUser.mass += collision.bUser.mass;
         }
     }
 
-    for(var z=0; z<currentPlayer.cells.length; z++) 
-    {
-      var currentCell = currentPlayer.cells[z];
+    // for(var z=0; z<currentPlayer.cells.length; z++) 
+    // {
+      // var currentCell = currentPlayer.cells[z];
       var playerCircle = new C(
-          new V(currentCell.x, currentCell.y),
-          currentCell.radius
+          new V(currentPlayer.x, currentPlayer.y),
+          currentPlayer.radius
       );
 
       var foodEaten = mice.map(funcFood)
@@ -601,13 +606,13 @@ function tickPlayer(currentPlayer) {
       //     }
       // }
 
-      if(typeof(currentCell.speed) == "undefined")
-          currentCell.speed = 6.25;
+      if(typeof(currentPlayer.speed) == "undefined")
+          currentPlayer.speed = 6.25;
       masaGanada += (foodEaten.length * conf.foodMass);
-      currentCell.mass += masaGanada;
+      currentPlayer.mass += masaGanada;
       currentPlayer.massTotal += masaGanada;
-      currentCell.radius = util.massToRadius(currentCell.mass);
-      playerCircle.r = currentCell.radius;
+      currentPlayer.radius = util.massToRadius(currentPlayer.mass);
+      playerCircle.r = currentPlayer.radius;
 
       tree.clear();
       tree.insert(users);
@@ -616,7 +621,7 @@ function tickPlayer(currentPlayer) {
       var otherUsers =  tree.retrieve(currentPlayer, check);
 
       playerCollisions.forEach(collisionCheck);
-    }
+    // }
 }
 
 
@@ -657,24 +662,29 @@ function tickSpider(spider)
             i--;
          }
          console.log("collision");
+      } else if (spider.mass > users[i].mass && dist < minDist) {
+         minDist = dist;
+         minTarget = users[i];
       }
    }
 
-
-   for(i = 0; i < mice.length; i++)
+   if (minDist > 300)
    {
-      dist = util.getDistance(spider, mice[i]);
-      if(dist < minDist) 
+      for(i = 0; i < mice.length; i++)
       {
-         if(dist < 0)
+         dist = util.getDistance(spider, mice[i]);
+         if(dist < minDist) 
          {
-            mice.splice(i, 1);
-            i--;
-         } 
-         else 
-         {
-            minDist = dist;
-            minTarget = mice[i];
+            if(dist < 0)
+            {
+               mice.splice(i, 1);
+               i--;
+            } 
+            else 
+            {
+               minDist = dist;
+               minTarget = mice[i];
+            }
          }
       }
    }
@@ -782,15 +792,15 @@ function gameloop() {
                 }
             }
         }
-        for (i = 0; i < users.length; i++) {
-            for(var z=0; z < users[i].cells.length; z++) {
-                if (users[i].cells[z].mass * (1 - (conf.massLossRate / 1000)) > conf.defaultPlayerMass) {
-                    var massLoss = users[i].cells[z].mass * (1 - (conf.massLossRate / 1000));
-                    users[i].massTotal -= users[i].cells[z].mass - massLoss;
-                    users[i].cells[z].mass = massLoss;
-                }
-            }
-        }
+        // for (i = 0; i < users.length; i++) {
+        //     // for(var z=0; z < users[i].cells.length; z++) {
+        //         if (users[i].cells[z].mass * (1 - (conf.massLossRate / 1000)) > conf.defaultPlayerMass) {
+        //             var massLoss = users[i].cells[z].mass * (1 - (conf.massLossRate / 1000));
+        //             users[i].massTotal -= users[i].cells[z].mass - massLoss;
+        //             users[i].cells[z].mass = massLoss;
+        //         }
+        //     // }
+        // }
     }
     balanceMass();
 }
