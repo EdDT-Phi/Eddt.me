@@ -1,38 +1,28 @@
 {
   "port": 3000,
-  "foodMass": 1,
-  "fireFood": 20,
-  "limitSplit": 16,
-  "defaultPlayerMass": 10,
-	"virus": {
-    "fill": "#33ff33",
-  	"stroke": "#19D119",
-		"strokeWidth": 20,
-		"defaultMass": {
-            "from": 100,
-            "to": 150
-        },
-		"splitMass": 180
-	},
   "mouse": {
-    "speed" : 1
+    "amount" : 100,
+    "speed" : 1,
+    "xp" : 1
   },
   "spider": {
-    "speed" : 2
+    "amount" : 50,
+    "speed" : 3,
+    "xp" : 5
   },
+  "hpForLevel": [100, 200, 300, 400, 500],
+  "xpForLevel": [10, 20, 50, 200, 1000],
+  "speedForLevel": [5, -1, -1, -1, -1],
+  "AIUsers" : 2,
   "gameWidth": 5000,
   "gameHeight": 5000,
   "adminPass": "DEFAULT",
-  "gameMass": 20000,
-  "maxMice": 500,
-  "maxSpider": 50,
-  "slowBase": 4.5,
   "logChat": 0,
   "networkUpdateFactor": 40,
   "maxHeartbeatInterval": 60000,
-  "foodUniformDisposition": true,
-  "virusUniformDisposition": false,
+
+  "miceUniformDisposition": true,
+  "spiderUniformDisposition": true,
   "newPlayerInitialPosition": "farthest",
-  "massLossRate": 1,
-  "mergeTimer": 15
+  "slowBase": 4.5
 }
