@@ -1,7 +1,7 @@
 {
   "port": 3000,
   "mouse": {
-    "amount" : 100,
+    "amount" : 200,
     "speed" : 1,
     "xp" : 1
   },
@@ -10,10 +10,10 @@
     "speed" : 3,
     "xp" : 5
   },
-  "hpForLevel": [100, 200, 300, 400, 500],
+  "hpForLevel": [100, 10, 20, 50, 100],
   "xpForLevel": [10, 20, 50, 200, 1000],
   "speedForLevel": [5, -1, -1, -1, -1],
-  "AIUsers" : 2,
+  "AIUsers" : 50,
   "gameWidth": 5000,
   "gameHeight": 5000,
   "adminPass": "DEFAULT",

@@ -37,7 +37,7 @@ grass.image.src = "img/grass.png";
 
 var knight = {
   image: new Image(),
-  size: 100
+  size: 2
 };
 knight.image.src = "img/knight.png";
 
@@ -727,11 +727,9 @@ function drawTree(tree)
 
 function drawSpider(spiderToDraw)
 {
-	// graph.strokeStyle = spider.stroke;
-	// graph.fillStyle = spider.fill;
-	// graph.lineWidth = spider.strokeWidth;
-	// drawCircle(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2, spiderToDraw.radius, spiderSides);
-	// console.log(spider);
+	graph.beginPath();
+	graph.arc(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2, spider.size, 0, 2 * Math.PI);
+	graph.stroke();
 
 	graph.save();
 	graph.translate(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2); // change origin
@@ -746,106 +744,18 @@ function drawPlayers(users)
 
 	for(var user = 0; user < users.length; user++)
 	{
-		graph.drawImage(knight.image, users[user].x - player.x + screenWidth / 2 - 100 , users[user].y - player.y + screenHeight / 2 - 75 , knight.size + users[user].radius, knight.size + users[user].radius);
+		graph.beginPath();
+		graph.arc(users[user].x - player.x + screenWidth / 2, users[user].y - player.y + screenHeight / 2, users[user].radius, 0, 2 * Math.PI);
+		graph.stroke();
+
+		graph.drawImage(knight.image, users[user].x - player.x + screenWidth / 2 - (users[user].radius / 2) * knight.size, users[user].y - player.y + screenHeight / 2 - (users[user].radius / 2) * knight.size  , users[user].radius * knight.size, users[user].radius * knight.size);
+
+
 		graph.fillStyle="red";
-		graph.fillRect(users[user].x - player.x + screenWidth / 2 - 90 , users[user].y - player.y + screenHeight / 2 + 50 , 100, 5);
+		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].radius*2, 5);
 		graph.fillStyle="green";
-		graph.fillRect(users[user].x - player.x + screenWidth / 2 - 90 , users[user].y - player.y + screenHeight / 2 + 50 , users[user].hp/users[user].maxHP * 100, 5);
+		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].hp/users[user].maxHP * users[user].radius*2, 5);
 	}
-
-	// var start = {
-	//     x: player.x - (screenWidth / 2),
-	//     y: player.y - (screenHeight / 2)
-	// };
-
-	// for(var z=0; z<order.length; z++)
-	// {
-	//     var users[i] = users[order[z].nCell];
-	//     var cellCurrent = users[order[z].nCell].cells[order[z].nDiv];
-
-	//     var x=0;
-	//     var y=0;
-
-	//     var points = 30 + ~~(users[user].mass/5);
-	//     var increase = Math.PI * 2 / points;
-
-	//     graph.strokeStyle = 'hsl(' + users[user].hue + ', 100%, 45%)';
-	//     graph.fillStyle = 'hsl(' + users[user].hue + ', 100%, 50%)';
-	//     graph.lineWidth = playerConfig.border;
-
-	//     var xstore = [];
-	//     var ystore = [];
-
-	//     spin += 0.0;
-
-	//     var circle = {
-	//         x: users[user].x - start.x,
-	//         y: users[user].y - start.y
-	//     };
-
-	//     for (var i = 0; i < points; i++) {
-
-	//         x = users[user].radius * Math.cos(spin) + circle.x;
-	//         y = users[user].radius * Math.sin(spin) + circle.y;
-	//         if(typeof(users[user].id) == "undefined") {
-	//             x = valueInRange(-users[user].x + screenWidth / 2, gameWidth - users[user].x + screenWidth / 2, x);
-	//             y = valueInRange(-users[user].y + screenHeight / 2, gameHeight - users[user].y + screenHeight / 2, y);
-	//         } else {
-	//             x = valueInRange(-users[user].x - player.x + screenWidth/2 + (users[user].radius/3), gameWidth - users[user].x + gameWidth - player.x + screenWidth/2 - (users[user].radius/3), x);
-	//             y = valueInRange(-users[user].y - player.y + screenHeight/2 + (users[user].radius/3), gameHeight - users[user].y + gameHeight - player.y + screenHeight/2 - (users[user].radius/3) , y);
-	//         }
-	//         spin += increase;
-	//         xstore[i] = x;
-	//         ystore[i] = y;
-	//     }
-	//     // if (wiggle >= player.radius/ 3) inc = -1;
-	//     // *if (wiggle <= player.radius / -3) inc = +1;
-	//     // *wiggle += inc;
-
-	//     for (i = 0; i < points; ++i) {
-	//         if (i === 0) {
-	//             graph.beginPath();
-	//             graph.moveTo(xstore[i], ystore[i]);
-	//         } else if (i > 0 && i < points - 1) {
-	//             graph.lineTo(xstore[i], ystore[i]);
-	//         } else {
-	//             graph.lineTo(xstore[i], ystore[i]);
-	//             graph.lineTo(xstore[0], ystore[0]);
-	//         }
-
-	//     }
-	//     graph.lineJoin = 'round';
-	//     graph.lineCap = 'round';
-	//     graph.fill();
-	//     graph.stroke();
-	//     var nameCell = "";
-	//     if(typeof(users[user].id) == "undefined")
-	//         nameCell = player.name;
-	//     else
-	//         nameCell = users[user].name;
-
-	//     var fontSize = Math.max(users[user].radius / 3, 12);
-	//     graph.lineWidth = playerConfig.textBorderSize;
-	//     graph.fillStyle = playerConfig.textColor;
-	//     graph.strokeStyle = playerConfig.textBorder;
-	//     graph.miterLimit = 1;
-	//     graph.lineJoin = 'round';
-	//     graph.textAlign = 'center';
-	//     graph.textBaseline = 'middle';
-	//     graph.font = 'bold ' + fontSize + 'px sans-serif';
-
-	//     if (toggleMassState === 0) {
-	//         graph.strokeText(nameCell, circle.x, circle.y);
-	//         graph.fillText(nameCell, circle.x, circle.y);
-	//     } else {
-	//         graph.strokeText(nameCell, circle.x, circle.y);
-	//         graph.fillText(nameCell, circle.x, circle.y);
-	//         graph.font = 'bold ' + Math.max(fontSize / 3 * 2, 10) + 'px sans-serif';
-	//         if(nameCell.length === 0) fontSize = 0;
-	//         graph.strokeText(Math.round(users[user].mass), circle.x, circle.y+fontSize);
-	//         graph.fillText(Math.round(users[user].mass), circle.x, circle.y+fontSize);
-	//     }
-	// }
 }
 
 function valueInRange(min, max, value)
@@ -867,9 +777,6 @@ function drawGrass()
 	  }
 	  i++;
 	}
-
-	// graph.stroke();
-	// graph.globalAlpha = 1;
 }
 
 function drawXPbar ()
@@ -1028,5 +935,6 @@ window.addEventListener('resize', resize);
 function resize() {
 	player.screenWidth = c.width = screenWidth = playerType == 'player' ? window.innerWidth : gameWidth;
 	player.screenHeight = c.height = screenHeight = playerType == 'player' ? window.innerHeight : gameHeight;
-	socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
+	if(socket)
+		socket.emit('windowResized', { screenWidth: screenWidth, screenHeight: screenHeight });
 }
