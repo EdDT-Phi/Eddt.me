@@ -49,9 +49,12 @@ function addMice(toAdd) {
 				x: position.x,
 				y: position.y,
 				radius: radius,
-				mass: Math.random() + 2,
+				hp: conf.mouse.hp,
+				maxHP: conf.mouse.hp,
+				direction: Math.random() * 2 * Math.PI,
+				attack: conf.mouse.attack,
+				defense: conf.mouse.defense,
 				// hue: Math.round(Math.random() * 360),
-				direction: Math.random() * 2 * Math.PI
 		  });
 	 }
 }
@@ -65,7 +68,7 @@ function addSpider(toAdd) {
 				id: ((new Date()).getTime() + '' + spiders.length) >>> 0,
 				x: Math.random() * conf.gameHeight, //position.x,
 				y: Math.random() * conf.gameWidth, //position.y,
-				mass: mass,
+				// mass: mass,
 				radius: radius,
 				direction: Math.random() * 2 * Math.PI
 		  });
@@ -166,7 +169,7 @@ function balanceMass() {
 
 function addPlayers()
 {
-	var radius = util.hpToRadius(conf.hpForLevel[0]);
+	var radius = util.hpToRadius(conf.playerHp[0]);
 	for(var Us = users.length; Us < conf.AIUsers; Us++)
 	{
 		var position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
@@ -174,14 +177,17 @@ function addPlayers()
 		users.push(
 		{
 			level: 0,
+			name: name,
 			type : 'fake',
 			x : position.x,
 			y : position.y,
 			radius : radius,
-			hp : conf.hpForLevel[0],
-			maxHP : conf.hpForLevel[0],
-			speed : conf.speedForLevel[0],
-			name: name
+			hp : conf.playerHp[0],
+			maxHP : conf.playerHp[0],
+			speed : conf.playerSpeed[0],
+			attack: conf.playerAttack[0],
+			defense: conf.playerDefense[0],
+			attackCounter : -1
 			// mass : conf.defaultPlayerMass,
 		});
 		io.emit('playerJoin', { name: name });
@@ -192,22 +198,24 @@ io.on('connection', function (socket) {
 	console.log('A user connected!', socket.handshake.query.type);
 
 	var type = socket.handshake.query.type;
-	var radius = util.hpToRadius(conf.hpForLevel[0]);
+	var radius = util.hpToRadius(conf.playerHp[0]);
 	var position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
-	var mass = conf.hpForLevel[0];
 	var currentPlayer = {
+		xp: 0,
+		level: 0,
+		type: type,
+		radius: radius,
 		id: socket.id,
 		x: position.x,
 		y: position.y,
-		hp: mass,
-		maxHP: mass,
-		radius: radius,
-		type: type,
-		level: 0,
-		xp: 0,
-		speed: conf.speedForLevel[0],
+		hp: conf.playerHp[0],
+		maxHP: conf.playerHp[0],
+		attack: conf.playerAttack[0],
+		defense: conf.playerDefense[0],
+		speed: conf.playerSpeed[0],
 		lastHeartbeat: new Date().getTime(),
+		attackCounter: -1,
 		target: {
 			x: 0,
 			y: 0
@@ -331,6 +339,18 @@ io.on('connection', function (socket) {
 });
 
 function tickPlayer(currentPlayer) {
+	function eatCreature(creature, xp)
+	{
+		creature.dead = true;
+		creature.deadCounter = conf.counters.dead;
+		currentPlayer.xp += xp;
+	}
+
+	function attack(p1, p2)
+	{
+		p2.hp -= Math.floor((p1.attack * p1.attack) / p2.defense) * 2;
+	}
+
 	if(currentPlayer.lastHeartbeat < new Date().getTime() - conf.maxHeartbeatInterval) {
 		sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + conf.maxHeartbeatInterval/1000.0 + ' seconds ago.');
 		sockets[currentPlayer.id].disconnect();
@@ -338,98 +358,53 @@ function tickPlayer(currentPlayer) {
 
 	movePlayer(currentPlayer);
 
-	function funcFood(f) {
-		return SAT.pointInCircle(new V(f.x, f.y), playerCircle);
+	if(currentPlayer.attackCounter >= 0)
+	{
+		currentPlayer.attackCounter--;
 	}
 
-	function deleteFood(f) {
-		if(mice[f])
-			mice[f].dead = true;
-		mice.splice(f, 1);
-	}
-
-	 function eatMass(m) {
-		  if(SAT.pointInCircle(new V(m.x, m.y), playerCircle)){
-				if(m.id == currentPlayer.id && m.speed > 0)// && z == m.num)
-					 return false;
-				if(currentPlayer.mass > m.masa * 1.1)
-					 return true;
-		  }
-		  return false;
-	 }
-
-	 function check(user) {
-				if(user.mass > 10 && user.id !== currentPlayer.id) {
-					 var response = new SAT.Response();
-					 var collided = SAT.testCircleCircle(playerCircle,
-						  new C(new V(user.x, user.y), user.radius),
-						  response);
-					 if (collided) {
-						  response.aUser = currentPlayer;
-						  response.bUser = user;
-						  playerCollisions.push(response);
-					 }
-				}
-	 }
-
-	 function collisionCheck(collision) {
-		 if (collision.aUser.mass > collision.bUser.mass * 1.1  && collision.aUser.radius > Math.sqrt(Math.pow(collision.aUser.x - collision.bUser.x, 2) + Math.pow(collision.aUser.y - collision.bUser.y, 2))*1.75) {
-				console.log('[DEBUG] Killing user: ' + collision.bUser.id);
-				console.log('[DEBUG] Collision info:');
-				console.log(collision);
-
-				var numUser = util.findIndex(users, collision.bUser.id);
-				if (numUser > -1) {
-					  users.splice(numUser, 1);
-					  io.emit('playerDied', { name: collision.bUser.name });
-					  if(collision.bUser.type != 'fake')
-					  {
-						  sockets[collision.bUser.id].emit('RIP');
-					  }
-				}
-				currentPlayer.mass += collision.bUser.mass;
-				collision.aUser.mass += collision.bUser.mass;
-		}
-	 }
-
-		var playerCircle = new C(
-			 new V(currentPlayer.x, currentPlayer.y),
-			 currentPlayer.radius
-		);
-
-		var foodEaten = mice.map(funcFood)
-			 .reduce( function(a, b, c) { return b ? a.concat(c) : a; }, []);
-
-		foodEaten.forEach(deleteFood);
-
-		currentPlayer.xp += foodEaten.length;
-		currentPlayer.radius = util.hpToRadius(currentPlayer.hp);
-		playerCircle.r = currentPlayer.radius;
-
-		if(currentPlayer.xp > conf.xpForLevel[currentPlayer.level])
+	var dist;
+	for (var i = 0; i < mice.length; i++) {
+		dist = util.getDistance(mice[i], currentPlayer);
+		if(currentPlayer.attackCounter < 0 && !mice[i].dead && dist < 0)
 		{
-			currentPlayer.level++;
-			currentPlayer.xp = 0;
+			currentPlayer.attackCounter = conf.playerAttackCounter;
+			attack(currentPlayer, mice[i]);
+			if(mice[i].hp < 0)
+			{
+				eatCreature(mice[i], conf.mouse.xp);
+			}
 
-			currentPlayer.hp += conf.hpForLevel[currentPlayer.level];
-			currentPlayer.maxHP += conf.hpForLevel[currentPlayer.level];
-			currentPlayer.speed += conf.speedForLevel[currentPlayer.level];
 		}
+	}
+
+	currentPlayer.radius = util.hpToRadius(currentPlayer.hp);
+
+	if(currentPlayer.xp > conf.xpForLevel[currentPlayer.level])
+	{
+		currentPlayer.level++;
+		currentPlayer.xp = 0;
+
+		currentPlayer.hp += conf.playerHp[currentPlayer.level];
+		currentPlayer.maxHP += conf.playerHp[currentPlayer.level];
+		currentPlayer.speed += conf.playerSpeed[currentPlayer.level];
+		currentPlayer.attack += conf.playerAttack[currentPlayer.level];
+		currentPlayer.defense += conf.playerDefense[currentPlayer.level];
+	}
 
 
-		// todo: get rid of this tree nonesence
-		tree.clear();
-		tree.insert(users);
-		var playerCollisions = [];
-
-		var otherUsers =  tree.retrieve(currentPlayer, check);
-
-		playerCollisions.forEach(collisionCheck);
+	// todo: player collisions
 }
 
 
 function tickMouse(mouse)
 {
+	if(mouse.deadCounter >= 0)
+	{
+		if(--mouse.deadCounter < 0)
+			return "dead";
+		return;
+	}
 	var dx = -conf.mouse.speed * Math.sin(mouse.direction);
 	var dy = conf.mouse.speed * Math.cos(mouse.direction);
 	if (mouse.x + dx > conf.gameWidth || mouse.y + dy > conf.gameHeight || mouse.x + dx < 0 || mouse.y + dy < 0)
@@ -446,57 +421,63 @@ function tickMouse(mouse)
 function tickSpider(spider)
 {
 	var minDist = 10000, minTarget, dist = 0;
-	for(var i = 0; i < users.length; i++)
+	if(spider.target && !spider.target.dead)
 	{
-		dist = util.getDistance(users[i], spider);
-		if(dist < 0)
+		for(var i = 0; i < users.length; i++)
 		{
-			if(spider.mass < users[i].mass)
+			dist = util.getDistance(users[i], spider);
+			if(dist < 0)
 			{
-				users[0].mass += spiders[i].mass;
-				return "dead";
-			}
-			else
-			{
-				users[i].dead = true;
-			}
-		} else if (spider.mass > users[i].mass && dist < minDist) {
-			minDist = dist;
-			minTarget = users[i];
-		}
-	}
-
-	if (minDist > 300)
-	{
-		for(i = 0; i < mice.length; i++)
-		{
-			dist = util.getDistance(spider, mice[i]);
-			if(dist < minDist)
-			{
-				if(dist < 0)
+				if(spider.mass < users[i].mass)
 				{
-					mice.splice(i, 1);
-					i--;
+					users[0].mass += spiders[i].mass;
+					return "dead";
 				}
 				else
 				{
-					minDist = dist;
-					minTarget = mice[i];
+					users[i].dead = true;
+				}
+			} else if (spider.mass > users[i].mass && dist < minDist) {
+				minDist = dist;
+				minTarget = users[i];
+			}
+		}
+
+		if (minDist > 300)
+		{
+			for(i = 0; i < mice.length; i++)
+			{
+				dist = util.getDistance(spider, mice[i]);
+				if(dist < minDist)
+				{
+					if(dist < 0)
+					{
+						mice[i].dead = true;
+						mice[i].deadCounter = conf.counters.dead;
+						// mice.splice(i, 1);
+						// i--;
+					}
+					else
+					{
+						minDist = dist;
+						minTarget = mice[i];
+					}
 				}
 			}
 		}
+
+		spider.target = minTarget;
 	}
 
 
 
 	// spider.direction = Math.PI/2;
-	if (minTarget)
+	if (spider.target)
 	{
-
 		var newDirection = 0;
-		if(minTarget.y === spider.y)
+		if(spider.target.y === spider.y)
 		{
-			if(minTarget.x < spider.x)
+			if(spider.target.x < spider.x)
 			{
 				newDirection = Math.PI * 0.5;
 			}
@@ -507,16 +488,15 @@ function tickSpider(spider)
 		}
 		else
 		{
-			newDirection = Math.atan((spider.x - minTarget.x)/(minTarget.y - spider.y));
+			newDirection = Math.atan((spider.x - spider.target.x)/(spider.target.y - spider.y));
 		}
-		if(minTarget.y-spider.y < 0)
+
+		if(spider.target.y-spider.y < 0)
 		{
 			newDirection += Math.PI;
 		}
 
-
 		spider.direction = newDirection;
-
 		var dx = -conf.spider.speed * Math.sin(spider.direction);
 		var dy = conf.spider.speed * Math.cos(spider.direction);
 		spider.x += dx;
@@ -527,7 +507,11 @@ function tickSpider(spider)
 function moveloop() {
 	for (var i = 0; i < mice.length; i++)
 	{
-	  tickMouse(mice[i]);
+		if (tickMouse(mice[i]) === "dead")
+		{
+			mice.splice(i,1);
+			i--;
+		}
 	}
 	for (i = 0; i < spiders.length; i++)
 	{
@@ -609,7 +593,13 @@ function sendUpdates() {
 						mouse.x < u.x + u.screenWidth/2 + 20 &&
 						mouse.y > u.y - u.screenHeight/2 - 20 &&
 						mouse.y < u.y + u.screenHeight/2 + 20) {
-						return mouse;
+						return {
+							x: mouse.x,
+							y: mouse.y,
+							hp: mouse.hp,
+							maxHP: mouse.maxHP,
+							direction: mouse.direction,
+						};
 					}
 				})
 				.filter(function(f) { return f; });

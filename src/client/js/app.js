@@ -29,6 +29,11 @@ var mouse = {
 };
 mouse.image.src = "img/mouse.png";
 
+var skull = {
+	image : new Image()
+};
+skull.image.src = "img/skull.ico";
+
 var grass = {
   image: new Image(),
   size: 50
@@ -701,16 +706,33 @@ function drawCircle(centerX, centerY, radius, sides)
 	graph.fill();
 }
 
-function drawMice(drawMouse) {
-	// graph.strokeStyle = 'hsl(' + drawMouse.hue + ', 100%, 45%)';
-	// graph.fillStyle = 'hsl(' + drawMouse.hue + ', 100%, 50%)';
-	// graph.lineWidth = drawMouseConfig.border;
-	// drawCircle(drawMouse.x - player.x + screenWidth / 2, drawMouse.y - player.y + screenHeight / 2, drawMouse.radius, drawMouseSides);
-
+function drawMice(drawMouse)
+{
 	graph.save();
 	graph.translate(drawMouse.x - player.x + screenWidth / 2, drawMouse.y - player.y + screenHeight / 2); // change origin
-	graph.rotate(drawMouse.direction);
-	graph.drawImage(mouse.image, -mouse.size/2 , -mouse.size/2 ,mouse.size, mouse.size);
+
+	var image;
+	if(drawMouse.dead)
+	{
+		image = skull.image;
+	}
+	else
+	{
+		image = mouse.image;
+
+		// graph.beginPath();
+		// graph.arc(0, 0, 50, 0, 2 * Math.PI);
+		// graph.stroke();
+
+		graph.fillStyle="red";
+		graph.fillRect(-mouse.size/2, mouse.size/2 , mouse.size, 5);
+		graph.fillStyle="green";
+		graph.fillRect(-mouse.size/2, mouse.size/2 , drawMouse.hp / drawMouse.maxHP * mouse.size, 5);
+
+		graph.rotate(drawMouse.direction);
+	}
+
+	graph.drawImage(image, -mouse.size/2 , -mouse.size/2 ,mouse.size, mouse.size);
 	graph.restore();
 }
 

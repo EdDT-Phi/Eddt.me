@@ -1,21 +1,33 @@
 {
   "port": 3000,
   "mouse": {
-    "amount" : 200,
+    "amount" : 2,
+    "xp" : 1,
+    "hp" : 50,
     "speed" : 1,
-    "xp" : 1
+    "attack" : 2,
+    "defense" : 2
   },
   "spider": {
-    "amount" : 50,
+    "amount" : 1,
+    "xp" : 5,
+    "hp" : 50,
     "speed" : 3,
-    "xp" : 5
+    "attack" : 5,
+    "defense" : 1
   },
-  "hpForLevel": [100, 10, 20, 50, 100],
+  "playerHp": [100, 10, 20, 50, 100],
+  "playerSpeed": [5, -1, -1, -1, -1],
+  "playerAttack" : [5, 2, 5, 8, 10],
+  "playerDefense" : [5, 2, 5, 8, 10],
   "xpForLevel": [10, 20, 50, 200, 1000],
-  "speedForLevel": [5, -1, -1, -1, -1],
-  "AIUsers" : 50,
-  "gameWidth": 5000,
-  "gameHeight": 5000,
+  "playerAttackCounter": 10,
+  "counters" : {
+    "dead" : 10
+  },
+  "AIUsers" : 0,
+  "gameWidth": 1000,
+  "gameHeight": 1000,
   "adminPass": "DEFAULT",
   "logChat": 0,
   "networkUpdateFactor": 40,
