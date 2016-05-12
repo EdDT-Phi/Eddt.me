@@ -51,9 +51,9 @@ function addMice(toAdd) {
 				radius: radius,
 				hp: conf.mouse.hp,
 				maxHP: conf.mouse.hp,
-				direction: Math.random() * 2 * Math.PI,
 				attack: conf.mouse.attack,
 				defense: conf.mouse.defense,
+				direction: Math.random() * 2 * Math.PI
 				// hue: Math.round(Math.random() * 360),
 		  });
 	 }
@@ -68,9 +68,13 @@ function addSpider(toAdd) {
 				id: ((new Date()).getTime() + '' + spiders.length) >>> 0,
 				x: Math.random() * conf.gameHeight, //position.x,
 				y: Math.random() * conf.gameWidth, //position.y,
-				// mass: mass,
 				radius: radius,
-				direction: Math.random() * 2 * Math.PI
+				hp: conf.spider.hp,
+				maxHP: conf.spider.hp,
+				attack: conf.spider.attack,
+				defense: conf.spider.defense,
+				direction: Math.random() * 2 * Math.PI,
+				attackCounter: -1
 		  });
 	 }
 }
@@ -209,11 +213,6 @@ io.on('connection', function (socket) {
 		id: socket.id,
 		x: position.x,
 		y: position.y,
-		hp: conf.playerHp[0],
-		maxHP: conf.playerHp[0],
-		attack: conf.playerAttack[0],
-		defense: conf.playerDefense[0],
-		speed: conf.playerSpeed[0],
 		lastHeartbeat: new Date().getTime(),
 		attackCounter: -1,
 		target: {
@@ -233,7 +232,19 @@ io.on('connection', function (socket) {
 		} else {
 			console.log('[INFO] Player ' + player.name + ' connected!');
 			sockets[player.id] = socket;
+
 			currentPlayer = player;
+
+			currentPlayer.dead = false;
+			currentPlayer.hp = conf.playerHp[0];
+			currentPlayer.maxHP = conf.playerHp[0];
+			currentPlayer.attack = conf.playerAttack[0];
+			currentPlayer.defense = conf.playerDefense[0];
+			currentPlayer.speed = conf.playerSpeed[0];
+
+
+
+
 			users.push(currentPlayer);
 			io.emit('playerJoin', { name: player.name });
 			socket.emit('gameSetup', {
@@ -338,18 +349,33 @@ io.on('connection', function (socket) {
 	});
 });
 
-function tickPlayer(currentPlayer) {
-	function eatCreature(creature, xp)
+function attackFunc(p1, p2)
+{
+	p1.attackCounter = conf.playerAttackCounter;
+	p2.hp -= Math.floor((p1.attack * p1.attack) / p2.defense) * 4;
+	p2.hp = Math.max(0, p2.hp);
+	if(p2.hp === 0)
 	{
-		creature.dead = true;
-		creature.deadCounter = conf.counters.dead;
-		currentPlayer.xp += xp;
+		killFunc(p2);
+		return "dead";
+	}
+}
+
+function killFunc(creature)
+{
+	creature.dead = true;
+	creature.deadCounter = conf.counters.dead;
+}
+
+function tickPlayer(currentPlayer) {
+
+	if(currentPlayer.deadCounter >= 0)
+	{
+		if(--currentPlayer.deadCounter === 0)
+			return "dead";
+		return;
 	}
 
-	function attack(p1, p2)
-	{
-		p2.hp -= Math.floor((p1.attack * p1.attack) / p2.defense) * 2;
-	}
 
 	if(currentPlayer.lastHeartbeat < new Date().getTime() - conf.maxHeartbeatInterval) {
 		sockets[currentPlayer.id].emit('kick', 'Last heartbeat received over ' + conf.maxHeartbeatInterval/1000.0 + ' seconds ago.');
@@ -364,21 +390,42 @@ function tickPlayer(currentPlayer) {
 	}
 
 	var dist;
-	for (var i = 0; i < mice.length; i++) {
-		dist = util.getDistance(mice[i], currentPlayer);
-		if(currentPlayer.attackCounter < 0 && !mice[i].dead && dist < 0)
+	for (var i = 0; i < users.length; i++) {
+		dist = util.getDistance(users[i], currentPlayer);
+		if(currentPlayer.id !== users[i].id  &&currentPlayer.attackCounter < 0 && !users[i].dead && dist < 0)
 		{
-			currentPlayer.attackCounter = conf.playerAttackCounter;
-			attack(currentPlayer, mice[i]);
-			if(mice[i].hp < 0)
+			if(attackFunc(currentPlayer, users[i]) === "dead")
 			{
-				eatCreature(mice[i], conf.mouse.xp);
+				currentPlayer.xp += conf.xpForKill[users[i].level];
 			}
 
 		}
 	}
 
-	currentPlayer.radius = util.hpToRadius(currentPlayer.hp);
+	for (i = 0; i < spiders.length; i++) {
+		dist = util.getDistance(spiders[i], currentPlayer);
+		if(currentPlayer.attackCounter < 0 && !spiders[i].dead && dist < 0)
+		{
+			if(attackFunc(currentPlayer, spiders[i]) === "dead")
+			{
+				currentPlayer.xp += conf.spider.xp;
+			}
+
+		}
+	}
+
+	for (i = 0; i < mice.length; i++) {
+		dist = util.getDistance(mice[i], currentPlayer);
+		if(currentPlayer.attackCounter < 0 && !mice[i].dead && dist < 0)
+		{
+			if(attackFunc(currentPlayer, mice[i]) === "dead")
+			{
+				currentPlayer.xp += conf.mouse.xp;
+			}
+		}
+	}
+
+
 
 	if(currentPlayer.xp > conf.xpForLevel[currentPlayer.level])
 	{
@@ -390,6 +437,8 @@ function tickPlayer(currentPlayer) {
 		currentPlayer.speed += conf.playerSpeed[currentPlayer.level];
 		currentPlayer.attack += conf.playerAttack[currentPlayer.level];
 		currentPlayer.defense += conf.playerDefense[currentPlayer.level];
+
+		currentPlayer.radius = util.hpToRadius(currentPlayer.maxHP);
 	}
 
 
@@ -401,7 +450,7 @@ function tickMouse(mouse)
 {
 	if(mouse.deadCounter >= 0)
 	{
-		if(--mouse.deadCounter < 0)
+		if(--mouse.deadCounter === 0)
 			return "dead";
 		return;
 	}
@@ -420,48 +469,48 @@ function tickMouse(mouse)
 
 function tickSpider(spider)
 {
-	var minDist = 10000, minTarget, dist = 0;
-	if(spider.target && !spider.target.dead)
+	if(spider.deadCounter >= 0)
+	{
+		if(--spider.deadCounter === 0)
+			return "dead";
+		return;
+	}
+
+	var minDist = conf.spider.sight, minTarget, dist = 0;
+
+	if(spider.attackCounter >= 0)
+	{
+		spider.attackCounter--;
+	}
+
+
+	if(!spider.target || util.getDistance(spider, spider.target) >= conf.spider.sight || spider.target.dead)
 	{
 		for(var i = 0; i < users.length; i++)
 		{
 			dist = util.getDistance(users[i], spider);
-			if(dist < 0)
+			if (users[i].dead !== true)
 			{
-				if(spider.mass < users[i].mass)
+				if(spider.attackCounter < 0 && dist < 0)
 				{
-					users[0].mass += spiders[i].mass;
-					return "dead";
+					attackFunc(spider, users[i]);
 				}
-				else
-				{
-					users[i].dead = true;
+				if (spider.attack > users[i].defense && dist < minDist) {
+					minDist = dist;
+					minTarget = users[i];
 				}
-			} else if (spider.mass > users[i].mass && dist < minDist) {
-				minDist = dist;
-				minTarget = users[i];
 			}
 		}
 
-		if (minDist > 300)
+		if (minDist === conf.spider.sight)
 		{
 			for(i = 0; i < mice.length; i++)
 			{
 				dist = util.getDistance(spider, mice[i]);
-				if(dist < minDist)
+				if(mice[i].dead !== true && dist < minDist)
 				{
-					if(dist < 0)
-					{
-						mice[i].dead = true;
-						mice[i].deadCounter = conf.counters.dead;
-						// mice.splice(i, 1);
-						// i--;
-					}
-					else
-					{
 						minDist = dist;
 						minTarget = mice[i];
-					}
 				}
 			}
 		}
@@ -470,10 +519,19 @@ function tickSpider(spider)
 	}
 
 
-
 	// spider.direction = Math.PI/2;
 	if (spider.target)
 	{
+		if(spider.attackCounter < 0 && util.getDistance(spider, spider.target) < 0)
+		{
+
+			if(attackFunc(spider, spider.target) === "dead")
+			{
+				spider.target = null;
+				return;
+			}
+		}
+
 		var newDirection = 0;
 		if(spider.target.y === spider.y)
 		{
@@ -502,6 +560,7 @@ function tickSpider(spider)
 		spider.x += dx;
 		spider.y += dy;
 	}
+
 }
 
 function moveloop() {
@@ -524,7 +583,7 @@ function moveloop() {
 
 	for (i = 0; i < users.length; i++)
 	{
-		if(users[i].dead)
+		if(tickPlayer(users[i]) === "dead")
 		{
 			io.emit('playerDied', { name: users[i].name });
 			if(users[i].type != 'fake')
@@ -533,10 +592,6 @@ function moveloop() {
 			}
 			users.splice(i, 1);
 			i--;
-		}
-		else
-		{
-			tickPlayer(users[i]);
 		}
 	}
 }

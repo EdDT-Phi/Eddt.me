@@ -351,12 +351,12 @@ function keyInput(event) {
 	}
 }
 
-	$( "#feed" ).click(function() {
+$( "#feed" ).click(function() {
 		socket.emit('1');
 		reenviar = false;
 });
 
-	$( "#split" ).click(function() {
+$( "#split" ).click(function() {
 		socket.emit('2');
 		reenviar = false;
 });
@@ -667,7 +667,7 @@ function setupSocket(socket) {
 				window.cancelAnimationFrame(animLoopHandle);
 				animLoopHandle = undefined;
 			}
-		}, 2500);
+		}, 1000);
 	});
 
 	socket.on('kick', function (data)
@@ -706,33 +706,37 @@ function drawCircle(centerX, centerY, radius, sides)
 	graph.fill();
 }
 
-function drawMice(drawMouse)
+function drawCreature(creature, image, debug)
 {
 	graph.save();
-	graph.translate(drawMouse.x - player.x + screenWidth / 2, drawMouse.y - player.y + screenHeight / 2); // change origin
+	graph.translate(creature.x - player.x + screenWidth / 2, creature.y - player.y + screenHeight / 2); // change origin
 
-	var image;
-	if(drawMouse.dead)
+	var useImage;
+	if(creature.dead)
 	{
-		image = skull.image;
+		console.log("dead");
+		useImage = skull.image;
 	}
 	else
 	{
-		image = mouse.image;
+		useImage = image.image;
 
-		// graph.beginPath();
-		// graph.arc(0, 0, 50, 0, 2 * Math.PI);
-		// graph.stroke();
+		if(debug)
+		{
+			// graph.beginPath();
+			// graph.arc(0, 0, 50, 0, 2 * Math.PI);
+			// graph.stroke();
+		}
 
 		graph.fillStyle="red";
-		graph.fillRect(-mouse.size/2, mouse.size/2 , mouse.size, 5);
+		graph.fillRect(-image.size/2, image.size/2 , image.size, 5);
 		graph.fillStyle="green";
-		graph.fillRect(-mouse.size/2, mouse.size/2 , drawMouse.hp / drawMouse.maxHP * mouse.size, 5);
+		graph.fillRect(-image.size/2, image.size/2 , creature.hp / creature.maxHP * image.size, 5);
 
-		graph.rotate(drawMouse.direction);
+		graph.rotate(creature.direction);
 	}
 
-	graph.drawImage(image, -mouse.size/2 , -mouse.size/2 ,mouse.size, mouse.size);
+	graph.drawImage(useImage, -image.size/2 , -image.size/2 ,image.size, image.size);
 	graph.restore();
 }
 
@@ -747,18 +751,18 @@ function drawTree(tree)
 
 }
 
-function drawSpider(spiderToDraw)
-{
-	graph.beginPath();
-	graph.arc(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2, spider.size, 0, 2 * Math.PI);
-	graph.stroke();
+// function drawSpider(spiderToDraw)
+// {
+// 	graph.beginPath();
+// 	graph.arc(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2, spiderToDraw.radius, 0, 2 * Math.PI);
+// 	graph.stroke();
 
-	graph.save();
-	graph.translate(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2); // change origin
-	graph.rotate(spiderToDraw.direction);
-	graph.drawImage(spider.image, -spider.size/2 , -spider.size/2 ,spider.size, spider.size);
-	graph.restore();
-}
+// 	graph.save();
+// 	graph.translate(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2); // change origin
+// 	graph.rotate(spiderToDraw.direction);
+// 	graph.drawImage(spider.image, -spider.size/2 , -spider.size/2 ,spider.size, spider.size);
+// 	graph.restore();
+// }
 
 
 function drawPlayers(users)
@@ -770,7 +774,17 @@ function drawPlayers(users)
 		graph.arc(users[user].x - player.x + screenWidth / 2, users[user].y - player.y + screenHeight / 2, users[user].radius, 0, 2 * Math.PI);
 		graph.stroke();
 
-		graph.drawImage(knight.image, users[user].x - player.x + screenWidth / 2 - (users[user].radius / 2) * knight.size, users[user].y - player.y + screenHeight / 2 - (users[user].radius / 2) * knight.size  , users[user].radius * knight.size, users[user].radius * knight.size);
+		var useImage;
+		if(users[user].dead)
+		{
+			useImage = skull.image;
+		}
+		else
+		{
+			useImage = knight.image;
+		}
+
+		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius / 2) * knight.size, users[user].y - player.y + screenHeight / 2 - (users[user].radius / 2) * knight.size  , users[user].radius * knight.size, users[user].radius * knight.size);
 
 
 		graph.fillStyle="red";
@@ -907,8 +921,8 @@ function gameLoop() {
 			graph.fillRect(0, 0, screenWidth, screenHeight);
 
 			drawGrass();
-			foods.forEach(drawMice);
-			spiders.forEach(drawSpider);
+			foods.forEach(function(creature){drawCreature(creature, mouse);});
+			spiders.forEach(function(creature){drawCreature(creature, spider);});
 			drawborder();
 
 
