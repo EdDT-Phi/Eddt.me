@@ -14,49 +14,51 @@ var KEY_LEFT = 37;
 var KEY_UP = 38;
 var KEY_RIGHT = 39;
 var KEY_DOWN = 40;
-var borderDraw = false;
+var borderDraw = true;
 var animLoopHandle;
-var spin = -Math.PI;
-var enemySpin = -Math.PI;
 var mobile = false;
-var foodSides = 10;
-var spiderSides = 20;
 
 
 var mouse = {
   image: new Image(),
   size: 50
-};
-mouse.image.src = "img/mouse.png";
+}; mouse.image.src = "img/mouse.png";
 
 var skull = {
 	image : new Image()
-};
-skull.image.src = "img/skull.ico";
+}; skull.image.src = "img/skull.ico";
 
 var grass = {
   image: new Image(),
   size: 50
-};
-grass.image.src = "img/grass.png";
+}; grass.image.src = "img/grass.png";
 
 var knight = {
   image: new Image(),
   size: 2
-};
-knight.image.src = "img/knight.png";
+}; knight.image.src = "img/knight.png";
 
 var tree = {
   image: new Image(),
   size: 250
-};
-tree.image.src = "img/tree.jpg";
+}; tree.image.src = "img/tree.jpg";
 
 var spider = {
   image: new Image(),
   size: 100
-};
-spider.image.src = "img/spider.png";
+}; spider.image.src = "img/spider.png";
+
+var zombie = {
+  image: new Image(),
+  size: 100
+}; zombie.image.src = "img/zombie.gif";
+
+var dragon = {
+  image: new Image(),
+  size: 300
+}; dragon.image.src = "img/dragon.gif";
+
+
 
 var debug = function(args) {
 	if (console && console.log) {
@@ -182,11 +184,13 @@ var player = {
 
 var thisPlayer;
 
-var foods = [];
-var spiders = [];
-// var fireFood = [];
-var xpLevels = [];
 var users = [];
+var mice = [];
+var spiders = [];
+var zombies = [];
+var dragons = [];
+var xpLevels = [];
+
 var leaderboard = [];
 var target = {x: player.x, y: player.y};
 var reenviar = true;
@@ -219,8 +223,8 @@ showMassSetting.onchange = toggleMass;
 // var continuitySetting = document.getElementById('continuity');
 // continuitySetting.onchange = toggleContinuity;
 
-var continuitySetting = document.getElementById('roundFood');
-continuitySetting.onchange = toggleRoundFood;
+// var continuitySetting = document.getElementById('roundFood');
+// continuitySetting.onchange = toggleRoundFood;
 
 var graph = c.getContext('2d');
 
@@ -483,28 +487,6 @@ function toggleMass() {
 	}
 }
 
-// function toggleContinuity() {
-//     if (!continuity) {
-//         continuity = true;
-//         chat.addSystemLine('Continuity enabled.');
-//     } else {
-//         continuity = false;
-//         chat.addSystemLine('Continuity disabled.');
-//     }
-// }
-
-function toggleRoundFood(args) {
-	if (args || foodSides < 10) {
-		foodSides = (args && !isNaN(args[0]) && +args[0] >= 3) ? +args[0] : 10;
-		chat.addSystemLine('Food is now rounded!');
-	} else {
-		foodSides = 5;
-		chat.addSystemLine('Food is no longer rounded!');
-	}
-}
-
-// TODO: Break out many of these GameControls into separate classes.
-
 chat.registerCommand('ping', 'Check your latency.', function () {
 	checkLatency();
 });
@@ -632,7 +614,7 @@ function setupSocket(socket) {
 	});
 
 	// Handle movement.
-	socket.on('serverTellPlayerMove', function (usersData, playerData, miceList, spiderList)
+	socket.on('serverTellPlayerMove', function (visible, playerData)
 	{
 		if(playerType == 'player')
 		{
@@ -646,9 +628,11 @@ function setupSocket(socket) {
 			player.yoffset = isNaN(yoffset) ? 0 : yoffset;
 		}
 
-		users = usersData;
-		foods = miceList;
-		spiders = spiderList;
+		users = visible.players;
+		mice = visible.mice;
+		spiders = visible.spiders;
+		zombies = visible.zombies;
+		dragons = visible.dragons;
 		thisPlayer = playerData;
 	});
 
@@ -714,7 +698,6 @@ function drawCreature(creature, image, debug)
 	var useImage;
 	if(creature.dead)
 	{
-		console.log("dead");
 		useImage = skull.image;
 	}
 	else
@@ -921,8 +904,10 @@ function gameLoop() {
 			graph.fillRect(0, 0, screenWidth, screenHeight);
 
 			drawGrass();
-			foods.forEach(function(creature){drawCreature(creature, mouse);});
+			mice.forEach(function(creature){drawCreature(creature, mouse);});
 			spiders.forEach(function(creature){drawCreature(creature, spider);});
+			zombies.forEach(function(creature){drawCreature(creature, zombie);});
+			dragons.forEach(function(creature){drawCreature(creature, dragon);});
 			drawborder();
 
 

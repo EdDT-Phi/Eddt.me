@@ -4,22 +4,41 @@
     "xp" : 1,
     "hp" : 40,
     "speed" : 1,
-    "amount" : 1,
     "attack" : 2,
-    "defense" : 2
+    "defense" : 2,
+    "amount" : 100
   },
   "spider": {
     "xp" : 15,
     "hp" : 100,
     "speed" : 3,
-    "amount" : 0,
     "attack" : 5,
     "defense" : 5,
-    "sight": 300
+    "sight": 300,
+    "amount" : 20
+  },
+  "zombie": {
+    "xp" : 15,
+    "hp" : 100,
+    "speed" : 3,
+    "attack" : 5,
+    "defense" : 5,
+    "sight": 300,
+    "amount" : 20
+  },
+  "dragon": {
+    "xp" : 15,
+    "hp" : 100,
+    "idleSpeed" : 3,
+    "activeSpeed" : 5,
+    "attack" : 5,
+    "defense" : 5,
+    "sight": 500,
+    "amount" : 1
   },
   "playerHp": [100, 10, 20, 50, 100],
-  "playerSpeed": [5, -1, -1, -1, -1],
-  "playerAttack" : [4, 2, 5, 8, 10],
+  "playerSpeed": [5, -0.5, -0.5, -0.5, -0.5],
+  "playerAttack" : [4, 1, 2, 3, 4],
   "playerDefense" : [4, 2, 5, 8, 10],
   "xpForLevel": [10, 20, 50, 200, 1000],
   "xpForKill": [10, 15, 30, 60, 100],
@@ -27,9 +46,9 @@
   "counters" : {
     "dead" : 40
   },
-  "AIUsers" : 0,
-  "gameWidth": 1000,
-  "gameHeight": 1000,
+  "AIUsers" : 20,
+  "gameWidth": 5000,
+  "gameHeight": 5000,
   "adminPass": "DEFAULT",
   "logChat": 0,
   "networkUpdateFactor": 40,

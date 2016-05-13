@@ -132,11 +132,11 @@ exports.randomName = function() {
 	"Toolmaker","Tough Nut","Trip","Troubadour","Turnip King","Twitch",
 	"Vagabond Warrior","Voluntary","Vortex","Washer","Waylay Dave","Wheels",
 	"Wooden Man","Woo Woo","Yellow Menace","Zero Charisma","Zesty Dragon","Zod"];
-	var other = ["Tyler \"H-12\" Camp", "WHOM", "Br9don"];
+	var other = ["Tyler \"H-12\" Camp", "WHOM", "Br9don", "Joby Wan Kenobi", "Trung Tran", "Fire Bird"];
 
 	var name = exports.randomInRange(0, names.length * 2);
 	if(name < names.length)
 		return names[name];
 	else
-		return names[name%3];
+		return other[name % other.length];
 };
