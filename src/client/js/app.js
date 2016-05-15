@@ -22,41 +22,41 @@ var mobile = false;
 var mouse = {
   image: new Image(),
   size: 50
-}; mouse.image.src = "img/mouse.png";
+}; mouse.image.src = 'img/mouse.png';
 
 var skull = {
 	image : new Image()
-}; skull.image.src = "img/skull.ico";
+}; skull.image.src = 'img/skull.ico';
 
 var grass = {
   image: new Image(),
   size: 50
-}; grass.image.src = "img/grass.png";
+}; grass.image.src = 'img/grass.png';
 
 var knight = {
   image: new Image(),
   size: 2
-}; knight.image.src = "img/knight.png";
+}; knight.image.src = 'img/knight.png';
 
 var tree = {
   image: new Image(),
   size: 250
-}; tree.image.src = "img/tree.jpg";
+}; tree.image.src = 'img/tree.jpg';
 
 var spider = {
   image: new Image(),
   size: 100
-}; spider.image.src = "img/spider.png";
+}; spider.image.src = 'img/spider.png';
 
 var zombie = {
   image: new Image(),
   size: 100
-}; zombie.image.src = "img/zombie.gif";
+}; zombie.image.src = 'img/zombie.png';
 
 var dragon = {
   image: new Image(),
   size: 300
-}; dragon.image.src = "img/dragon.gif";
+}; dragon.image.src = 'img/dragon.png';
 
 
 
@@ -80,7 +80,7 @@ function startGame(type) {
 	document.getElementById('startMenuWrapper').style.maxHeight = '0px';
 	document.getElementById('gameAreaWrapper').style.opacity = 1;
 	if (!socket) {
-		socket = io({query:"type=" + type});
+		socket = io({query:'type=' + type});
 		setupSocket(socket);
 	}
 	if (!animLoopHandle)
@@ -355,12 +355,12 @@ function keyInput(event) {
 	}
 }
 
-$( "#feed" ).click(function() {
+$( '#feed' ).click(function() {
 		socket.emit('1');
 		reenviar = false;
 });
 
-$( "#split" ).click(function() {
+$( '#split' ).click(function() {
 		socket.emit('2');
 		reenviar = false;
 });
@@ -589,14 +589,14 @@ function setupSocket(socket) {
 			status += '<br />';
 			if (leaderboard[i].id == player.id){
 				if(leaderboard[i].name.length !== 0)
-					status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + "</span>";
+					status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + ' (' + leaderboard[i].level+')</span>';
 				else
-					status += '<span class="me">' + (i + 1) + ". An unnamed cell</span>";
+					status += '<span class="me">' + (i + 1) + '. Unnamed Freak (' + leaderboard[i].level+')</span>';
 			} else {
 				if(leaderboard[i].name.length !== 0)
-					status += (i + 1) + '. ' + leaderboard[i].name;
+					status += (i + 1) + '. ' + leaderboard[i].name+ ' (' + leaderboard[i].level+')';
 				else
-					status += (i + 1) + '. An unnamed cell';
+					status += (i + 1) + '. An unnamed cell' + ' (' + leaderboard[i].level+')';
 			}
 		}
 		//status += '<br />Players: ' + data.players;
@@ -711,9 +711,9 @@ function drawCreature(creature, image, debug)
 			// graph.stroke();
 		}
 
-		graph.fillStyle="red";
+		graph.fillStyle='red';
 		graph.fillRect(-image.size/2, image.size/2 , image.size, 5);
-		graph.fillStyle="green";
+		graph.fillStyle='green';
 		graph.fillRect(-image.size/2, image.size/2 , creature.hp / creature.maxHP * image.size, 5);
 
 		graph.rotate(creature.direction);
@@ -770,9 +770,9 @@ function drawPlayers(users)
 		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius / 2) * knight.size, users[user].y - player.y + screenHeight / 2 - (users[user].radius / 2) * knight.size  , users[user].radius * knight.size, users[user].radius * knight.size);
 
 
-		graph.fillStyle="red";
+		graph.fillStyle='red';
 		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].radius*2, 5);
-		graph.fillStyle="green";
+		graph.fillStyle='green';
 		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].hp/users[user].maxHP * users[user].radius*2, 5);
 	}
 }
@@ -800,13 +800,13 @@ function drawGrass()
 
 function drawXPbar ()
 {
-	graph.fillStyle="black";
+	graph.fillStyle='black';
 	graph.fillRect(0, screenHeight - 10, screenWidth, 10);
 
-	graph.font = "30px Arial";
-	graph.fillText("Level " + thisPlayer.level, screenWidth / 2, screenHeight - 20);
+	graph.font = '30px Arial';
+	graph.fillText('Level ' + thisPlayer.level, screenWidth / 2, screenHeight - 20);
 
-	graph.fillStyle="blue";
+	graph.fillStyle='blue';
 	graph.fillRect(0, screenHeight - 10, screenWidth * thisPlayer.xp/xpLevels[thisPlayer.level] , 10);
 }
 
@@ -908,6 +908,7 @@ function gameLoop() {
 			spiders.forEach(function(creature){drawCreature(creature, spider);});
 			zombies.forEach(function(creature){drawCreature(creature, zombie);});
 			dragons.forEach(function(creature){drawCreature(creature, dragon);});
+			// console.log(dragons[0].x, dragons[0].y);
 			drawborder();
 
 
@@ -916,7 +917,7 @@ function gameLoop() {
 			});
 
 			drawPlayers(users);
-			socket.emit('0', target); // playerSendTarget "Heartbeat".
+			socket.emit('0', target); // playerSendTarget 'Heartbeat'.
 
 			drawXPbar();
 

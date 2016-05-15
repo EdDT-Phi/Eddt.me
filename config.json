@@ -27,13 +27,13 @@
     "amount" : 20
   },
   "dragon": {
-    "xp" : 15,
-    "hp" : 100,
-    "idleSpeed" : 3,
-    "activeSpeed" : 5,
-    "attack" : 5,
-    "defense" : 5,
-    "sight": 500,
+    "xp" : 200,
+    "hp" : 500,
+    "idleSpeed" : 2,
+    "attackSpeed" : 5,
+    "attack" : 10,
+    "defense" : 20,
+    "sight": 300,
     "amount" : 1
   },
   "playerHp": [100, 10, 20, 50, 100],
