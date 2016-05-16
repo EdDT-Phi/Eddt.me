@@ -11,7 +11,7 @@ exports.validNick = function(nickname) {
 
 // determine radius of circle
 exports.hpToRadius = function (hp) {
-	return Math.sqrt(hp) * 5 + 10;
+	return Math.sqrt(hp) * 4 + 15;
 };
 
 
@@ -40,37 +40,44 @@ exports.randomPosition = function (radius) {
 	};
 };
 
-exports.uniformPosition = function(points, radius) {
-	var bestCandidate, maxDistance = 0;
-	var numberOfCandidates = 10;
-
-	if (points.length === 0) {
-		return exports.randomPosition(radius);
-	}
-
-	// Generate the cadidates
-	for (var ci = 0; ci < numberOfCandidates; ci++) {
-		var minDistance = Infinity;
-		var candidate = exports.randomPosition(radius);
-		candidate.radius = radius;
-
-		for (var pi = 0; pi < points.length; pi++) {
-			var distance = exports.getDistance(candidate, points[pi]);
-			if (distance < minDistance) {
-				minDistance = distance;
-			}
-		}
-
-		if (minDistance > maxDistance) {
-			bestCandidate = candidate;
-			maxDistance = minDistance;
-		} else {
-			return exports.randomPosition(radius);
-		}
-	}
-
-	return bestCandidate;
+exports.newPlayerPos = function(radius)
+{
+	var r = exports.randomInRange(radius-1000, radius);
+	var deg = Math.random() * Math.PI * 2;
+	return {x: r * Math.cos(deg), y: r * Math.sin(deg)};
 };
+
+// exports.uniformPosition = function(points, radius) {
+// 	var bestCandidate, maxDistance = 0;
+// 	var numberOfCandidates = 10;
+
+// 	if (points.length === 0) {
+// 		return exports.randomPosition(radius);
+// 	}
+
+// 	// Generate the cadidates
+// 	for (var ci = 0; ci < numberOfCandidates; ci++) {
+// 		var minDistance = Infinity;
+// 		var candidate = exports.randomPosition(radius);
+// 		candidate.radius = radius;
+
+// 		for (var pi = 0; pi < points.length; pi++) {
+// 			var distance = exports.getDistance(candidate, points[pi]);
+// 			if (distance < minDistance) {
+// 				minDistance = distance;
+// 			}
+// 		}
+
+// 		if (minDistance > maxDistance) {
+// 			bestCandidate = candidate;
+// 			maxDistance = minDistance;
+// 		} else {
+// 			return exports.randomPosition(radius);
+// 		}
+// 	}
+
+// 	return bestCandidate;
+// };
 
 exports.findUserById = function(arr, id) {
 	var len = arr.length;

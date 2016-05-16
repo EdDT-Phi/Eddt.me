@@ -38,6 +38,11 @@ var knight = {
   size: 2
 }; knight.image.src = 'img/knight.png';
 
+var knight_attack = {
+  image: new Image(),
+  size: 2
+}; knight_attack.image.src = 'img/knight_attack.png';
+
 var tree = {
   image: new Image(),
   size: 250
@@ -200,18 +205,29 @@ var directions = [];
 var c = document.getElementById('cvs');
 c.width = screenWidth; c.height = screenHeight;
 c.addEventListener('mousemove', gameInput, false);
-c.addEventListener('mouseout', outOfBounds, false);
+// c.addEventListener('mouseout', outOfBounds, false);
 c.addEventListener('keypress', keyInput, false);
 c.addEventListener('keyup', function(event) {reenviar = true; directionUp(event);}, false);
 c.addEventListener('keydown', directionDown, false);
 c.addEventListener('touchstart', touchInput, false);
 c.addEventListener('touchmove', touchInput, false);
+c.addEventListener('mousedown', attack, false);
+c.addEventListener('mouseup', stopAttack, false);
 
 // Register when the mouse goes off the canvas.
-function outOfBounds() {
+// function outOfBounds() {
 	// if (!continuity) {
 		// target = { x : 0, y: 0 };
 	// }
+// }
+function attack()
+{
+	socket.emit('attack');
+}
+
+function stopAttack()
+{
+	socket.emit('stopAttack');
 }
 
 var visibleBorderSetting = document.getElementById('visBord');
@@ -764,7 +780,10 @@ function drawPlayers(users)
 		}
 		else
 		{
-			useImage = knight.image;
+			if(users[user].attacking)
+				useImage = knight_attack.image;
+			else
+				useImage = knight.image;
 		}
 
 		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius / 2) * knight.size, users[user].y - player.y + screenHeight / 2 - (users[user].radius / 2) * knight.size  , users[user].radius * knight.size, users[user].radius * knight.size);

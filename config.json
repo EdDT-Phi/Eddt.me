@@ -19,19 +19,19 @@
   },
   "zombie": {
     "xp" : 15,
-    "hp" : 100,
-    "speed" : 3,
-    "attack" : 5,
-    "defense" : 5,
-    "sight": 300,
-    "amount" : 20
+    "hp" : 200,
+    "speed" : 2,
+    "attack" : 10,
+    "defense" : 2,
+    "sight": 500,
+    "amount" : 50
   },
   "dragon": {
-    "xp" : 200,
-    "hp" : 500,
+    "xp" : 400,
+    "hp" : 1000,
     "idleSpeed" : 2,
     "attackSpeed" : 5,
-    "attack" : 10,
+    "attack" : 15,
     "defense" : 20,
     "sight": 300,
     "amount" : 1
@@ -40,7 +40,7 @@
   "playerSpeed": [5, -0.5, -0.5, -0.5, -0.5],
   "playerAttack" : [4, 1, 2, 3, 4],
   "playerDefense" : [4, 2, 5, 8, 10],
-  "xpForLevel": [10, 20, 50, 200, 1000],
+  "xpForLevel": [20, 100, 200, 500, 2000],
   "xpForKill": [10, 15, 30, 60, 100],
   "playerAttackCounter": 20,
   "counters" : {
@@ -52,10 +52,5 @@
   "adminPass": "DEFAULT",
   "logChat": 0,
   "networkUpdateFactor": 40,
-  "maxHeartbeatInterval": 60000,
-
-  "miceUniformDisposition": true,
-  "spiderUniformDisposition": true,
-  "newPlayerInitialPosition": "farthest",
-  "slowBase": 4.5
+  "maxHeartbeatInterval": 60000
 }
