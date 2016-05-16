@@ -72,7 +72,7 @@ exports.uniformPosition = function(points, radius) {
 	return bestCandidate;
 };
 
-exports.findIndex = function(arr, id) {
+exports.findUserById = function(arr, id) {
 	var len = arr.length;
 
 	while (len--) {

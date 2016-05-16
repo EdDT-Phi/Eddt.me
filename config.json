@@ -6,7 +6,7 @@
     "speed" : 1,
     "attack" : 2,
     "defense" : 2,
-    "amount" : 100
+    "amount" : 200
   },
   "spider": {
     "xp" : 15,

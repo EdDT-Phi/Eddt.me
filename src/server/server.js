@@ -235,7 +235,6 @@ io.on('connection', function (socket) {
 
 	var type = socket.handshake.query.type;
 	var radius = util.hpToRadius(conf.playerHp[0]);
-	var position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
 
 	var currentPlayer = {
 		xp: 0,
@@ -243,8 +242,6 @@ io.on('connection', function (socket) {
 		type: type,
 		radius: radius,
 		id: socket.id,
-		x: position.x,
-		y: position.y,
 		lastHeartbeat: new Date().getTime(),
 		attackCounter: -1,
 		playerKills: 0,
@@ -256,7 +253,7 @@ io.on('connection', function (socket) {
 
 	socket.on('gotit', function (player) {
 	   console.log('[INFO] Player ' + player.name + ' connecting!');
-		if (util.findIndex(users, player.id) > -1) {
+		if (util.findUserById(users, player.id) > -1) {
 			console.log('[INFO] Player ID is already connected, kicking.');
 			socket.disconnect();
 		} else if (!util.validNick(player.name)) {
@@ -269,6 +266,7 @@ io.on('connection', function (socket) {
 			currentPlayer = player;
 
 
+			var position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, player.radis) : util.randomPosition(player.radius);
 			currentPlayer.dead = false;
 			currentPlayer.xp = 0;
 			currentPlayer.level = 0;
@@ -277,6 +275,8 @@ io.on('connection', function (socket) {
 			currentPlayer.attack = conf.playerAttack[0];
 			currentPlayer.defense = conf.playerDefense[0];
 			currentPlayer.speed = conf.playerSpeed[0];
+			currentPlayer.x =  position.x;
+			currentPlayer.y =  position.y;
 
 
 
@@ -301,15 +301,15 @@ io.on('connection', function (socket) {
 	});
 
 	 socket.on('respawn', function () {
-		  if (util.findIndex(users, currentPlayer.id) > -1)
-				users.splice(util.findIndex(users, currentPlayer.id), 1);
+		  if (util.findUserById(users, currentPlayer.id) > -1)
+				users.splice(util.findUserById(users, currentPlayer.id), 1);
 		  socket.emit('welcome', currentPlayer, {xpLevels: conf.xpForLevel});
 		  console.log('[INFO] User ' + currentPlayer.name + ' respawned!');
 	 });
 
 	 socket.on('disconnect', function () {
-		  if (util.findIndex(users, currentPlayer.id) > -1)
-				users.splice(util.findIndex(users, currentPlayer.id), 1);
+		  if (util.findUserById(users, currentPlayer.id) > -1)
+				users.splice(util.findUserById(users, currentPlayer.id), 1);
 		  console.log('[INFO] User ' + currentPlayer.name + ' disconnected!');
 
 		  socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
@@ -440,6 +440,30 @@ function tickPlayer(currentPlayer) {
 		}
 	}
 
+	for (i = 0; i < dragons.length; i++) {
+		dist = util.getDistance(dragons[i], currentPlayer);
+		if(currentPlayer.attackCounter < 0 && !dragons[i].dead && dist < 0)
+		{
+			if(attackFunc(currentPlayer, dragons[i]) === "dead")
+			{
+				currentPlayer.xp += conf.dragon.xp;
+			}
+
+		}
+	}
+
+	for (i = 0; i < zombies.length; i++) {
+		dist = util.getDistance(zombies[i], currentPlayer);
+		if(currentPlayer.attackCounter < 0 && !zombies[i].dead && dist < 0)
+		{
+			if(attackFunc(currentPlayer, zombies[i]) === "dead")
+			{
+				currentPlayer.xp += conf.zombie.xp;
+			}
+
+		}
+	}
+
 	for (i = 0; i < spiders.length; i++) {
 		dist = util.getDistance(spiders[i], currentPlayer);
 		if(currentPlayer.attackCounter < 0 && !spiders[i].dead && dist < 0)
@@ -492,7 +516,7 @@ function tickMouse(mouse)
 	var dy = conf.mouse.speed * Math.cos(mouse.direction);
 	if (mouse.x + dx > conf.gameWidth || mouse.y + dy > conf.gameHeight || mouse.x + dx < 0 || mouse.y + dy < 0)
 	{
-		mouse.direction += 0.5;
+		mouse.direction += 1;
 	}
 	else
 	{
@@ -538,6 +562,7 @@ function tickSpider(spider)
 
 		if (minDist === conf.spider.sight)
 		{
+			minDist = 10000;
 			for(i = 0; i < mice.length; i++)
 			{
 				dist = util.getDistance(spider, mice[i]);
@@ -593,6 +618,73 @@ function tickSpider(spider)
 		var dy = conf.spider.speed * Math.cos(spider.direction);
 		spider.x += dx;
 		spider.y += dy;
+	}
+}
+
+function tickZombie(zombie)
+{
+	if(zombie.deadCounter >= 0)
+	{
+		if(--zombie.deadCounter === 0)
+			return "dead";
+		return;
+	}
+
+	if(zombie.attackCounter >= 0)
+	{
+		zombie.attackCounter--;
+	}
+
+
+	if(!zombie.target  || zombie.target.dead)
+	{
+		if(leaderboard.length > 0)
+		{
+			var id = leaderboard[util.randomInRange(0, leaderboard.length)].id;
+			zombie.target = users[util.findUserById(users, id)];
+		}
+	}
+
+
+	// zombie.direction = Math.PI/2;
+	if (zombie.target)
+	{
+		if(zombie.attackCounter < 0 && util.getDistance(zombie, zombie.target) < 0)
+		{
+			if(attackFunc(zombie, zombie.target) === "dead")
+			{
+				zombie.target = null;
+				return;
+			}
+		}
+
+		var newDirection = 0;
+		if(zombie.target.y === zombie.y)
+		{
+			if(zombie.target.x < zombie.x)
+			{
+				newDirection = Math.PI * 0.5;
+			}
+			else
+			{
+				newDirection = Math.PI * 1.5;
+			}
+		}
+		else
+		{
+			newDirection = Math.atan((zombie.x - zombie.target.x)/(zombie.target.y - zombie.y));
+		}
+
+		if(zombie.target.y-zombie.y < 0)
+		{
+			newDirection += Math.PI;
+		}
+
+		zombie.direction = newDirection;
+		var dx = -conf.zombie.speed * Math.sin(zombie.direction);
+		var dy = conf.zombie.speed * Math.cos(zombie.direction);
+		zombie.x += dx;
+		zombie.y += dy;
 	}
 }
 
@@ -661,13 +753,17 @@ function tickDragon(dragon)
 			dragon.target = center;
 			dragon.state = 'return';
 		}
-		else if(dragon.attackCounter < 0 && util.getDistance(dragon, dragon.target) < 0)
+		else if(util.getDistance(dragon, dragon.target) < 0)
 		{
-			if(attackFunc(dragon, dragon.target) === "dead")
+			if(dragon.attackCounter < 0)
 			{
-				dragon.target = null;
-				return;
+				if(attackFunc(dragon, dragon.target) === "dead")
+				{
+					dragon.target = null;
+					return;
+				}
 			}
+			return;
 		}
 	}
 	if(dragon.state === 'return')
@@ -732,14 +828,14 @@ function moveloop()
 	}
 
 
-	// for (i = 0; i < zombies.length; i++)
-	// {
-	// 	if(tickZombie(zombies[i]) === "dead")
-	// 	{
-	// 		zombies.splice(i, 1);
-	// 		i--;
-	// 	}
-	// }
+	for (i = 0; i < zombies.length; i++)
+	{
+		if(tickZombie(zombies[i]) === "dead")
+		{
+			zombies.splice(i, 1);
+			i--;
+		}
+	}
 
 	for (i = 0; i < dragons.length; i++)
 	{
