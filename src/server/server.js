@@ -5,7 +5,6 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-// var SAT = require('sat');
 
 // Import game settings.
 var conf = require('../../config.json');
@@ -19,19 +18,16 @@ console.log(args);
 
 var users = [];
 
-// var massFood = [];
 var mice = [];
 var spiders = [];
 var zombies = [];
 var dragons = [];
+
 var sockets = {};
 
 
 var leaderboard = [];
 var leaderboardChanged = false;
-
-// var V = SAT.Vector;
-// var C = SAT.Circle;
 
 var initMassLog = util.log(conf.defaultPlayerMass, conf.slowBase);
 
@@ -44,6 +40,7 @@ function addMice() {
 		  mice.push({
 				// Make IDs unique.
 				id: ((new Date()).getTime() + '' + mice.length) >>> 0,
+				type: 'mouse',
 				x: position.x,
 				y: position.y,
 				radius: radius,
@@ -63,6 +60,7 @@ function addSpiders() {
 		  // var position = conf.spiderUniformDisposition ? util.uniformPosition(spider, radius) : util.randomPosition(radius);
 		spiders.push({
 			id: ((new Date()).getTime() + '' + spiders.length) >>> 0,
+			type: 'spider',
 			x: Math.random() * conf.gameHeight, //position.x,
 			y: Math.random() * conf.gameWidth, //position.y,
 			radius: radius,
@@ -82,6 +80,7 @@ function addZombies() {
 		  // var position = conf.spiderUniformDisposition ? util.uniformPosition(spider, radius) : util.randomPosition(radius);
 		zombies.push({
 			id: ((new Date()).getTime() + '' + zombies.length) >>> 0,
+			type: 'zombie',
 			x: Math.random() * conf.gameHeight, //position.x,
 			y: Math.random() * conf.gameWidth, //position.y,
 			radius: radius,
@@ -101,6 +100,7 @@ function addDragons() {
 		  // var position = conf.spiderUniformDisposition ? util.uniformPosition(spider, radius) : util.randomPosition(radius);
 		dragons.push({
 			id: ((new Date()).getTime() + '' + dragons.length) >>> 0,
+			type: 'dragon',
 			x: conf.gameWidth/2, //position.x,
 			y: conf.gameHeight/2, //position.y,
 			state: 'idle',
@@ -267,6 +267,11 @@ io.on('connection', function (socket) {
 
 
 			var position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, player.radis) : util.randomPosition(player.radius);
+			while(util.getDistance(position, dragons[0]) < 1000)
+			{
+				position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, player.radis) : util.randomPosition(player.radius);
+			}
+
 			currentPlayer.dead = false;
 			currentPlayer.xp = 0;
 			currentPlayer.level = 0;
@@ -277,9 +282,6 @@ io.on('connection', function (socket) {
 			currentPlayer.speed = conf.playerSpeed[0];
 			currentPlayer.x =  position.x;
 			currentPlayer.y =  position.y;
-
-
-
 
 			users.push(currentPlayer);
 			io.emit('playerJoin', { name: player.name });
@@ -390,7 +392,13 @@ function attackFunc(p1, p2)
 	p1.attackCounter = conf.playerAttackCounter;
 	p2.hp -= Math.floor((p1.attack * p1.attack) / p2.defense) * 4;
 	p2.hp = Math.max(0, p2.hp);
-	p2.attacked = true;
+
+
+	if(p2.type === 'zombie' || p2.type === 'dragon')
+	{
+		p2.target = p1;
+	}
+
 	if(p2.hp === 0)
 	{
 		killFunc(p2);
@@ -483,6 +491,7 @@ function tickPlayer(currentPlayer) {
 			if(attackFunc(currentPlayer, mice[i]) === "dead")
 			{
 				currentPlayer.xp += conf.mouse.xp;
+				currentPlayer.hp = Math.min(currentPlayer.maxHP, currentPlayer.hp + 5);
 			}
 		}
 	}
@@ -614,10 +623,8 @@ function tickSpider(spider)
 		}
 
 		spider.direction = newDirection;
-		var dx = -conf.spider.speed * Math.sin(spider.direction);
-		var dy = conf.spider.speed * Math.cos(spider.direction);
-		spider.x += dx;
-		spider.y += dy;
+		spider.x -= conf.spider.speed * Math.sin(spider.direction);
+		spider.y += conf.spider.speed * Math.cos(spider.direction);
 	}
 }
 
@@ -681,10 +688,8 @@ function tickZombie(zombie)
 		}
 
 		zombie.direction = newDirection;
-		var dx = -conf.zombie.speed * Math.sin(zombie.direction);
-		var dy = conf.zombie.speed * Math.cos(zombie.direction);
-		zombie.x += dx;
-		zombie.y += dy;
+		zombie.x -= conf.zombie.speed * Math.sin(zombie.direction);
+		zombie.y += conf.zombie.speed * Math.cos(zombie.direction);
 	}
 }
 
@@ -748,7 +753,7 @@ function tickDragon(dragon)
 
 	if(dragon.state === 'attack')
 	{
-		if (!dragon.target || dragon.target.dead)
+		if (!dragon.target || dragon.target.dead || util.getDistance(dragon, center) > 1000)
 		{
 			dragon.target = center;
 			dragon.state = 'return';
@@ -1023,13 +1028,13 @@ setInterval(sendUpdates, 1000 / conf.networkUpdateFactor);
 
 // Don't touch, IP configurations.
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
-var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || conf.port;
+var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.KEREKT_PORT || conf.port;
 if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
 	 http.listen( serverport, ipaddress, function() {
 		  console.log('[DEBUG] Listening on *:' + serverport);
 	 });
 } else {
 	 http.listen( serverport, function() {
-		  console.log('[DEBUG] Listening on *:' + conf.port);
+		  console.log('[DEBUG] Listening on *:' + serverport);
 	 });
 }
