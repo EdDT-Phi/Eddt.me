@@ -258,6 +258,7 @@ io.on('connection', function (socket) {
 			currentPlayer = player;
 
 			var position = util.newPlayerPos(conf.gameWidth/2);
+			console.log(position);
 			var radius = util.hpToRadius(conf.playerHp[0]);
 			currentPlayer.dead = false;
 			currentPlayer.xp = 0;
@@ -370,10 +371,12 @@ io.on('connection', function (socket) {
 		currentPlayer.attacking = true;
 	});
 
-	socket.on('attack', function()
+	socket.on('stopAttack', function()
 	{
 		currentPlayer.attacking = false;
 	});
+
+	socket.on('space', function(){});
 
 	// Heartbeat function, update everytime.
 	socket.on('0', function(target) {
@@ -497,6 +500,12 @@ function tickPlayer(currentPlayer) {
 	{
 		currentPlayer.level++;
 		currentPlayer.xp = 0;
+
+
+		if(currentPlayer.level == 2)
+		{
+			sockets[currentPlayer.id].emit('LVL2');
+		}
 
 		currentPlayer.hp += conf.playerHp[currentPlayer.level];
 		currentPlayer.maxHP += conf.playerHp[currentPlayer.level];
@@ -1007,6 +1016,7 @@ function sendUpdates() {
 						maxHP: user.maxHP,
 						radius: user.radius,
 						attacking: user.attackCounter > 0,
+						dead: user.dead
 					};
 				}
 			})

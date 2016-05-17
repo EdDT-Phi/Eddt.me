@@ -1,5 +1,5 @@
 {
-  "port": 3000,
+  "port": 3001,
   "mouse": {
     "xp" : 1,
     "hp" : 40,
@@ -36,12 +36,30 @@
     "sight": 300,
     "amount" : 1
   },
+  "archer": {
+    "hp": 100,
+    "speed": 100,
+    "attack": 100,
+    "defense": 100
+  },
+  "mage": {
+    "hp": 100,
+    "speed": 100,
+    "attack": 100,
+    "defense": 100
+  },
+  "knight": {
+    "hp": 100,
+    "speed": 100,
+    "attack": 100,
+    "defense": 100
+  },
   "playerHp": [100, 10, 20, 50, 100],
-  "playerSpeed": [5, -0.5, -0.5, -0.5, -0.5],
-  "playerAttack" : [4, 1, 2, 3, 4],
-  "playerDefense" : [4, 2, 5, 8, 10],
-  "xpForLevel": [20, 100, 200, 500, 2000],
-  "xpForKill": [10, 15, 30, 60, 100],
+  "playerSpeed": [5, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2],
+  "playerAttack" :  [4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "playerDefense" : [4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "xpForLevel": [20, 100, 200, 500, 2000, 4000, 10000, 100000, 1000000, 1000000],
+  "xpForKill": [10, 50, 100, 250, 1000, 2000, 5000, 50000, 500000, 500000],
   "playerAttackCounter": 20,
   "counters" : {
     "dead" : 40

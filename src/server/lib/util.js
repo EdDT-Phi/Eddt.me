@@ -44,7 +44,7 @@ exports.newPlayerPos = function(radius)
 {
 	var r = exports.randomInRange(radius-1000, radius);
 	var deg = Math.random() * Math.PI * 2;
-	return {x: r * Math.cos(deg), y: r * Math.sin(deg)};
+	return {x: r * Math.cos(deg) + radius, y: r * Math.sin(deg) + radius};
 };
 
 // exports.uniformPosition = function(points, radius) {

@@ -39,6 +39,33 @@ div {
     padding: 5px;
 }
 
+#archer {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
+#knight {
+    position: absolute;
+    bottom: 10px;
+    right: 110px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
+#mage {
+    position: absolute;
+    bottom: 10px;
+    right: 210px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
 #status {
     position: absolute;
     padding: 10px;
@@ -256,7 +283,7 @@ div {
     opacity: 0;
 }
 
-@media only screen  and (min-width : 1224px) {
+/*@media only screen  and (min-width : 1224px) {
 #mobile {
 display: none;
 	}
@@ -267,3 +294,4 @@ display: none;
 display: none;
         }
 }
+*/

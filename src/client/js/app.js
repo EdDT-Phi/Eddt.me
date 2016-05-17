@@ -43,6 +43,16 @@ var knight_attack = {
   size: 2
 }; knight_attack.image.src = 'img/knight_attack.png';
 
+var peasant = {
+  image: new Image(),
+  size: 2
+}; peasant.image.src = 'img/peasant.png';
+
+var peasant_attack = {
+  image: new Image(),
+  size: 2
+}; peasant_attack.image.src = 'img/peasant_attack.png';
+
 var tree = {
   image: new Image(),
   size: 250
@@ -84,6 +94,11 @@ function startGame(type) {
 
 	document.getElementById('startMenuWrapper').style.maxHeight = '0px';
 	document.getElementById('gameAreaWrapper').style.opacity = 1;
+
+	document.getElementById('archer').style.visibility = 'hidden';
+	document.getElementById('knight').style.visibility = 'hidden';
+	document.getElementById('mage').style.visibility = 'hidden';
+
 	if (!socket) {
 		socket = io({query:'type=' + type});
 		setupSocket(socket);
@@ -362,7 +377,7 @@ function keyInput(event) {
 		reenviar = false;
 	}
 	else if (key === KEY_SPLIT && reenviar) {
-	   document.getElementById('split_cell').play();
+	   // document.getElementById('split_cell').play();
 		socket.emit('2');
 		reenviar = false;
 	}
@@ -678,10 +693,12 @@ function setupSocket(socket) {
 		socket.close();
 	});
 
-	socket.on('spiderSplit', function (spiderCell)
+	socket.on('LVL2', function ()
 	{
-		socket.emit('2', spiderCell);
-		reenviar = false;
+		console.log('yay!');
+		document.getElementById('archer').style.visibility = 'visible';
+		document.getElementById('knight').style.visibility = 'visible';
+		document.getElementById('mage').style.visibility = 'visible';
 	});
 }
 
@@ -781,24 +798,18 @@ function drawPlayers(users)
 		else
 		{
 			if(users[user].attacking)
-				useImage = knight_attack.image;
+				useImage = peasant_attack.image;
 			else
-				useImage = knight.image;
+				useImage = peasant.image;
 		}
 
-		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius / 2) * knight.size, users[user].y - player.y + screenHeight / 2 - (users[user].radius / 2) * knight.size  , users[user].radius * knight.size, users[user].radius * knight.size);
-
+		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius), users[user].y - player.y + screenHeight / 2 - (users[user].radius)  , users[user].radius * 2, users[user].radius * 2);
 
 		graph.fillStyle='red';
 		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].radius*2, 5);
 		graph.fillStyle='green';
 		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].hp/users[user].maxHP * users[user].radius*2, 5);
 	}
-}
-
-function valueInRange(min, max, value)
-{
-	return Math.min(max, Math.max(min, value));
 }
 
 function drawGrass()
