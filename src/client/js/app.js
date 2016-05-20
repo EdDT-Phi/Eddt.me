@@ -420,16 +420,19 @@ function hideAll()
 $('#archer' ).click(function() {
 		socket.emit('upgrade', 'archer');
 		hideAll();
+		c.focus();
 });
 
 $('#knight' ).click(function() {
 		socket.emit('upgrade', 'knight');
 		hideAll();
+		c.focus();
 });
 
 $('#mage' ).click(function() {
 		socket.emit('upgrade', 'mage');
 		hideAll();
+		c.focus();
 });
 
 // Function called when a key is pressed, will change direction if arrow key.
