@@ -265,7 +265,7 @@ io.on('connection', function (socket) {
 			console.log(position);
 			var radius = util.hpToRadius(conf.playerHp[0]);
 			currentPlayer.dead = false;
-			currentPlayer.xp = 1000;
+			currentPlayer.xp = 0;
 			currentPlayer.level = 0;
 			currentPlayer.class = 'peasant';
 			currentPlayer.hp = conf.playerHp[0];
