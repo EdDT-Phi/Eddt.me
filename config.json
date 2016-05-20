@@ -19,7 +19,7 @@
   },
   "zombie": {
     "xp" : 15,
-    "hp" : 200,
+    "hp" : 100,
     "speed" : 2,
     "attack" : 10,
     "defense" : 2,
@@ -48,6 +48,18 @@
     "attack": 100,
     "defense": 100
   },
+  "fire": {
+    "speed": 15,
+    "damage": 100,
+    "range": 1500,
+    "radius": 75
+  },
+  "arrow": {
+    "speed": 15,
+    "damage": 100,
+    "range": 1500,
+    "radius": 75
+  },
   "knight": {
     "hp": 100,
     "speed": 100,
@@ -58,13 +70,16 @@
   "playerSpeed": [5, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2],
   "playerAttack" :  [4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
   "playerDefense" : [4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-  "xpForLevel": [20, 100, 200, 500, 2000, 4000, 10000, 100000, 1000000, 1000000],
-  "xpForKill": [10, 50, 100, 250, 1000, 2000, 5000, 50000, 500000, 500000],
-  "playerAttackCounter": 20,
+  "xpForLevel": [20, 100, 200, 500, 2000, 4000, 10000, 100000, 1000000, 10000000],
+  "xpForKill": [10, 50, 100, 250, 1000, 2000, 5000, 50000, 500000, 5000000],
   "counters" : {
-    "dead" : 40
+    "dead" : 40,
+    "attack": 20,
+    "projectile": 50,
+    "achievement": 100
   },
   "AIUsers" : 20,
+  "fakeFactor" : 5,
   "gameWidth": 5000,
   "gameHeight": 5000,
   "adminPass": "DEFAULT",

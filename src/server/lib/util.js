@@ -104,6 +104,29 @@ exports.randomColor = function() {
 	};
 };
 
+exports.getDirection = function (from, target) {
+	if(target.y === from.y)
+	{
+		if(target.x < from.x)
+		{
+			return Math.PI * 0.5;
+		}
+		else
+		{
+			return Math.PI * 1.5;
+		}
+	}
+	else
+	{
+		var newDirection = Math.atan((from.x - target.x)/(target.y - from.y));
+		if(target.y < from.y)
+		{
+			return newDirection + Math.PI;
+		}
+		return newDirection;
+	}
+};
+
 
 exports.randomName = function() {
 	var names = ["3D Waffle", "57 Pixels","101","Accidental Genius","Alpha",

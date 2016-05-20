@@ -7,9 +7,7 @@ var socket;
 var reason;
 var KEY_ESC = 27;
 var KEY_ENTER = 13;
-var KEY_CHAT = 13;
-var KEY_FIREFOOD = 119;
-var KEY_SPLIT = 32;
+var KEY_SPACE = 32;
 var KEY_LEFT = 37;
 var KEY_UP = 38;
 var KEY_RIGHT = 39;
@@ -21,7 +19,7 @@ var mobile = false;
 
 var mouse = {
   image: new Image(),
-  size: 50
+  size: 40
 }; mouse.image.src = 'img/mouse.png';
 
 var skull = {
@@ -33,25 +31,54 @@ var grass = {
   size: 50
 }; grass.image.src = 'img/grass.png';
 
-var knight = {
-  image: new Image(),
-  size: 2
-}; knight.image.src = 'img/knight.png';
 
-var knight_attack = {
-  image: new Image(),
-  size: 2
-}; knight_attack.image.src = 'img/knight_attack.png';
+var projectile_types = {
+ 	fire: {
+  		image: new Image()
+  	},
+  	arrow: {
+  		image: new Image()
+  	}
+};
 
-var peasant = {
-  image: new Image(),
-  size: 2
-}; peasant.image.src = 'img/peasant.png';
+projectile_types.fire.image.src = 'img/fire.png';
+projectile_types.arrow.image.src = 'img/arrow.png';
 
-var peasant_attack = {
-  image: new Image(),
-  size: 2
-}; peasant_attack.image.src = 'img/peasant_attack.png';
+var classes = {
+	knight : {
+	  	image: new Image(),
+		attack : {
+		  	image: new Image()
+		}
+	},
+	peasant : {
+	  	image: new Image(),
+		attack : {
+		  image: new Image()
+		}
+	},
+	mage : {
+	  	image: new Image(),
+		attack : {
+		  image: new Image()
+		}
+	},
+	archer : {
+	  	image: new Image(),
+		attack : {
+		  image: new Image()
+		}
+	},
+};
+
+classes.knight.image.src = 'img/knight.png';
+classes.knight.attack.image.src = 'img/knight_attack.png';
+classes.peasant.image.src = 'img/peasant.png';
+classes.peasant.attack.image.src = 'img/peasant_attack.png';
+classes.archer.image.src = 'img/archer.png';
+// classes.archer.attack.image.src = 'img/archer_attack.png';
+classes.mage.image.src = 'img/mage.png';
+// classes.mage.attack.image.src = 'img/mage_attack.png';
 
 var tree = {
   image: new Image(),
@@ -95,9 +122,7 @@ function startGame(type) {
 	document.getElementById('startMenuWrapper').style.maxHeight = '0px';
 	document.getElementById('gameAreaWrapper').style.opacity = 1;
 
-	document.getElementById('archer').style.visibility = 'hidden';
-	document.getElementById('knight').style.visibility = 'hidden';
-	document.getElementById('mage').style.visibility = 'hidden';
+	hideAll();
 
 	if (!socket) {
 		socket = io({query:'type=' + type});
@@ -209,11 +234,12 @@ var mice = [];
 var spiders = [];
 var zombies = [];
 var dragons = [];
+var projectiles = [];
 var xpLevels = [];
+var achievements = [];
 
 var leaderboard = [];
 var target = {x: player.x, y: player.y};
-var reenviar = true;
 var directionLock = false;
 var directions = [];
 
@@ -221,8 +247,8 @@ var c = document.getElementById('cvs');
 c.width = screenWidth; c.height = screenHeight;
 c.addEventListener('mousemove', gameInput, false);
 // c.addEventListener('mouseout', outOfBounds, false);
-c.addEventListener('keypress', keyInput, false);
-c.addEventListener('keyup', function(event) {reenviar = true; directionUp(event);}, false);
+// c.addEventListener('keypress', keyInput, false);
+c.addEventListener('keyup', directionUp, false);
 c.addEventListener('keydown', directionDown, false);
 c.addEventListener('touchstart', touchInput, false);
 c.addEventListener('touchmove', touchInput, false);
@@ -372,35 +398,52 @@ var chat = new ChatClient();
 // Chat command callback functions.
 function keyInput(event) {
 	var key = event.which || event.keyCode;
-	if (key === KEY_FIREFOOD && reenviar) {
-		socket.emit('1');
-		reenviar = false;
+	if (key === KEY_SPACE) {
+		socket.emit('space');
 	}
-	else if (key === KEY_SPLIT && reenviar) {
-	   // document.getElementById('split_cell').play();
-		socket.emit('2');
-		reenviar = false;
-	}
-	else if (key === KEY_CHAT) {
+	else if (key === KEY_ENTER) {
 		document.getElementById('chatInput').focus();
+	}
+	else if (key === KEY_ESC)
+	{
+
 	}
 }
 
-$( '#feed' ).click(function() {
-		socket.emit('1');
-		reenviar = false;
+function hideAll()
+{
+	document.getElementById('archer').style.visibility = 'hidden';
+	document.getElementById('knight').style.visibility = 'hidden';
+	document.getElementById('mage').style.visibility = 'hidden';
+}
+
+$('#archer' ).click(function() {
+		socket.emit('upgrade', 'archer');
+		hideAll();
 });
 
-$( '#split' ).click(function() {
-		socket.emit('2');
-		reenviar = false;
+$('#knight' ).click(function() {
+		socket.emit('upgrade', 'knight');
+		hideAll();
+});
+
+$('#mage' ).click(function() {
+		socket.emit('upgrade', 'mage');
+		hideAll();
 });
 
 // Function called when a key is pressed, will change direction if arrow key.
 function directionDown(event) {
 	var key = event.which || event.keyCode;
 
-	if (directional(key)) {
+	console.log(key);
+
+	if (key === KEY_SPACE) {
+		socket.emit('space');
+	}
+	else if (key === KEY_ENTER) {
+		document.getElementById('chatInput').focus();
+	} else if (directional(key)) {
 		directionLock = true;
 		if (newDirection(key,directions, true)) {
 			updateTarget(directions);
@@ -664,6 +707,7 @@ function setupSocket(socket) {
 		spiders = visible.spiders;
 		zombies = visible.zombies;
 		dragons = visible.dragons;
+		projectiles = visible.projectiles;
 		thisPlayer = playerData;
 	});
 
@@ -699,6 +743,12 @@ function setupSocket(socket) {
 		document.getElementById('archer').style.visibility = 'visible';
 		document.getElementById('knight').style.visibility = 'visible';
 		document.getElementById('mage').style.visibility = 'visible';
+	});
+
+
+	socket.on('achievement', function(achievement)
+	{
+		achievements.push(achievement);
 	});
 }
 
@@ -739,9 +789,9 @@ function drawCreature(creature, image, debug)
 
 		if(debug)
 		{
-			// graph.beginPath();
-			// graph.arc(0, 0, 50, 0, 2 * Math.PI);
-			// graph.stroke();
+			graph.beginPath();
+			graph.arc(0, 0, 50, 0, 2 * Math.PI);
+			graph.stroke();
 		}
 
 		graph.fillStyle='red';
@@ -753,6 +803,24 @@ function drawCreature(creature, image, debug)
 	}
 
 	graph.drawImage(useImage, -image.size/2 , -image.size/2 ,image.size, image.size);
+	graph.restore();
+}
+
+function drawProjectile(projectile, debug)
+{
+	graph.save();
+	graph.translate(projectile.x - player.x + screenWidth / 2, projectile.y - player.y + screenHeight / 2); // change origin
+
+	if(debug)
+	{
+		graph.beginPath();
+		graph.arc(0, 0, 50, 0, 2 * Math.PI);
+		graph.stroke();
+	}
+
+	graph.rotate(projectile.direction);
+	console.log(projectile);
+	graph.drawImage(projectile_types[projectile.type].image, -projectile.radius/2 , -projectile.radius/2 ,projectile.radius, projectile.radius);
 	graph.restore();
 }
 
@@ -797,10 +865,11 @@ function drawPlayers(users)
 		}
 		else
 		{
+			var char = classes[users[user].class];
 			if(users[user].attacking)
-				useImage = peasant_attack.image;
+				useImage = char.attack.image;
 			else
-				useImage = peasant.image;
+				useImage = char.image;
 		}
 
 		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius), users[user].y - player.y + screenHeight / 2 - (users[user].radius)  , users[user].radius * 2, users[user].radius * 2);
@@ -881,6 +950,25 @@ function drawborder() {
 	}
 }
 
+function drawAchievements()
+{
+	graph.fillStyle='black';
+	graph.font = '30px Arial';
+	for (var i = 0; i < achievements.length; i++)
+	{
+		if(achievements[i].counter-- < 0)
+		{
+			achievements.splice(i, 1);
+			i--;
+		}
+		else
+		{
+			graph.fillText(achievements[i].txt, (screenWidth / 2) - achievements[i].txt.length/2 , (i+1)*20);
+		}
+	}
+}
+
+
 function gameInput(mouse) {
 	if (!directionLock) {
 		target.x = mouse.clientX - screenWidth / 2;
@@ -938,6 +1026,9 @@ function gameLoop() {
 			spiders.forEach(function(creature){drawCreature(creature, spider);});
 			zombies.forEach(function(creature){drawCreature(creature, zombie);});
 			dragons.forEach(function(creature){drawCreature(creature, dragon);});
+			projectiles.forEach(drawProjectile);
+			drawAchievements();
+
 			// console.log(dragons[0].x, dragons[0].y);
 			drawborder();
 
