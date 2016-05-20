@@ -235,8 +235,6 @@ io.on('connection', function (socket) {
 	var type = socket.handshake.query.type;
 
 	var currentPlayer = {
-		xp: 0,
-		level: 0,
 		type: type,
 		id: socket.id,
 		lastHeartbeat: new Date().getTime(),
@@ -267,7 +265,7 @@ io.on('connection', function (socket) {
 			console.log(position);
 			var radius = util.hpToRadius(conf.playerHp[0]);
 			currentPlayer.dead = false;
-			currentPlayer.xp = 0;
+			currentPlayer.xp = 1000;
 			currentPlayer.level = 0;
 			currentPlayer.class = 'peasant';
 			currentPlayer.hp = conf.playerHp[0];
@@ -278,6 +276,13 @@ io.on('connection', function (socket) {
 			currentPlayer.x =  position.x;
 			currentPlayer.y =  position.y;
 			currentPlayer.radius = radius;
+			currentPlayer.killed = {
+				mice: 0,
+				spiders: 0,
+				zombies: 0,
+				dragons: 0,
+				players: 0
+			};
 
 			users.push(currentPlayer);
 			io.emit('playerJoin', { name: player.name });
@@ -386,6 +391,12 @@ io.on('connection', function (socket) {
 	socket.on('upgrade', function(_class)
 	{
 		currentPlayer.class = _class;
+		console.log(_class, conf[_class]);
+		currentPlayer.hp += conf[_class].hp;
+		currentPlayer.maxHP += conf[_class].hp;
+		currentPlayer.speed += conf[_class].speed;
+		currentPlayer.attack += conf[_class].attack;
+		currentPlayer.defense += conf[_class].defense;
 	});
 
 	socket.on('space', function()
@@ -508,6 +519,15 @@ function tickPlayer(currentPlayer) {
 
 		if(currentPlayer.attackCounter < 0 && !dragon.dead && util.getDistance(dragon, currentPlayer) < 0 && attackFunc(currentPlayer, dragon) === "dead")
 		{
+			if(currentPlayer.type === 'player')
+			{
+				currentPlayer.killed.dragons++;
+				let kills = currentPlayer.killed.dragons;
+				if(kills === 1)
+					sockets[currentPlayer.id].emit('achievement', {txt: 'Killed your first dragon!', counter: conf.counters.achievement});
+				else if (kills === 10 || kills === 50)
+					sockets[currentPlayer.id].emit('achievement', {txt: 'Killed '+kills+' dragons!', counter: conf.counters.achievement});
+			}
 			currentPlayer.xp += conf.dragon.xp;
 		}
 
@@ -517,6 +537,15 @@ function tickPlayer(currentPlayer) {
 			{
 				if(attackFunc(currentPlayer, zombies[i]) === "dead")
 				{
+					if(currentPlayer.type === 'player')
+					{
+						currentPlayer.killed.zombies++;
+						let kills = currentPlayer.killed.zombies;
+						if(kills === 1)
+							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed your first zombie!', counter: conf.counters.achievement});
+						else if (kills === 10 || kills === 50)
+							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed '+kills+' zombies!', counter: conf.counters.achievement});
+					}
 					currentPlayer.xp += conf.zombie.xp;
 				}
 
@@ -529,6 +558,15 @@ function tickPlayer(currentPlayer) {
 			{
 				if(attackFunc(currentPlayer, spiders[i]) === "dead")
 				{
+					if(currentPlayer.type === 'player')
+					{
+						currentPlayer.killed.spiders++;
+						let kills = currentPlayer.killed.spiders;
+						if(kills === 1)
+							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed your first spider!', counter: conf.counters.achievement});
+						else if (kills === 10 || kills === 50)
+							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed '+kills+' spiders!', counter: conf.counters.achievement});
+					}
 					currentPlayer.xp += conf.spider.xp;
 				}
 
@@ -542,7 +580,14 @@ function tickPlayer(currentPlayer) {
 				if(attackFunc(currentPlayer, mice[i]) === "dead")
 				{
 					if(currentPlayer.type === 'player')
-						sockets[currentPlayer.id].emit('achievement', {txt: 'killed first mouse: ' + mice[i].id, counter: conf.counters.achievement});
+					{
+						currentPlayer.killed.mice++;
+						let kills = currentPlayer.killed.mice;
+						if(kills === 1)
+							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed your first mouse!', counter: conf.counters.achievement});
+						else if (kills === 10 || kills === 50)
+							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed '+kills+' mice!', counter: conf.counters.achievement});
+					}
 
 					currentPlayer.xp += conf.mouse.xp * (currentPlayer.type === 'fake' ? conf.fakeFactor: 1) ;
 					currentPlayer.hp = Math.min(currentPlayer.maxHP, currentPlayer.hp + 5);
@@ -556,7 +601,7 @@ function tickPlayer(currentPlayer) {
 	if(currentPlayer.xp > conf.xpForLevel[currentPlayer.level])
 	{
 		currentPlayer.level++;
-		currentPlayer.xp = 0;
+		currentPlayer.xp -= conf.xpForLevel[currentPlayer.level];
 
 
 		if(currentPlayer.level == 2)

@@ -11,7 +11,7 @@ exports.validNick = function(nickname) {
 
 // determine radius of circle
 exports.hpToRadius = function (hp) {
-	return Math.sqrt(hp) * 4 + 15;
+	return Math.sqrt(hp) * 2 + 20;
 };
 
 

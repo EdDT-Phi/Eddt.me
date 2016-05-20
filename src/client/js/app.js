@@ -963,7 +963,7 @@ function drawAchievements()
 		}
 		else
 		{
-			graph.fillText(achievements[i].txt, (screenWidth / 2) - achievements[i].txt.length/2 , (i+1)*20);
+			graph.fillText(achievements[i].txt, (screenWidth / 2) - achievements[i].txt.length , (i + 1) * 25);
 		}
 	}
 }

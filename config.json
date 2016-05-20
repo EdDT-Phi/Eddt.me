@@ -37,20 +37,26 @@
     "amount" : 1
   },
   "archer": {
-    "hp": 100,
-    "speed": 100,
-    "attack": 100,
-    "defense": 100
+    "hp": 50,
+    "speed": 1,
+    "attack": -4,
+    "defense": -2
   },
   "mage": {
+    "hp": 0,
+    "speed": -1,
+    "attack": -4,
+    "defense": -3
+  },
+  "knight": {
     "hp": 100,
-    "speed": 100,
-    "attack": 100,
-    "defense": 100
+    "speed": -2,
+    "attack": 3,
+    "defense": 4
   },
   "fire": {
     "speed": 15,
-    "damage": 100,
+    "damage": 75,
     "range": 1500,
     "radius": 75
   },
@@ -59,12 +65,6 @@
     "damage": 100,
     "range": 1500,
     "radius": 75
-  },
-  "knight": {
-    "hp": 100,
-    "speed": 100,
-    "attack": 100,
-    "defense": 100
   },
   "playerHp": [100, 10, 20, 50, 100],
   "playerSpeed": [5, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2],
