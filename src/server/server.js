@@ -798,21 +798,22 @@ function tickDragon()
 		if (!dragon.target || dragon.target.dead ||
 		util.getDistance(dragon, dragon.target) >= conf.dragon.sight)
 		{
-			for(var i = 0; i < users.length; i++)
-			{
-				dist = util.getDistance(users[i], dragon);
-				if (users[i].dead !== true)
-				{
-					if(dragon.attackCounter < 0 && dist < 0)
-					{
-						attackFunc(dragon, users[i]);
-					}
-					if (dist < minDist) {
-						minDist = dist;
-						dragon.target = users[i];
-					}
-				}
-			}
+			dragon.target = distanceCheck(dragon, users, conf.dragon.sight).target;
+			// for(var i = 0; i < users.length; i++)
+			// {
+			// 	dist = util.getDistance(users[i], dragon);
+			// 	if (users[i].dead !== true)
+			// 	{
+			// 		if(dragon.attackCounter < 0 && dist < 0)
+			// 		{
+			// 			attackFunc(dragon, users[i]);
+			// 		}
+			// 		if (dist < minDist) {
+			// 			minDist = dist;
+			// 			dragon.target = users[i];
+			// 		}
+			// 	}
+			// }
 		}
 
 		if(dragon.target)
