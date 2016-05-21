@@ -136,7 +136,14 @@ function addPlayers()
 			attack: conf.playerAttack[0],
 			defense: conf.playerDefense[0],
 			attackCounter: -1,
-			playerKills: 0
+			playerKills: 0,
+			kills : {
+				mouse: 0,
+				spider: 0,
+				zombie: 0,
+				dragon: 0,
+				player: 0
+			}
 			// mass: conf.defaultPlayerMass,
 		});
 		io.emit('playerJoin', { name: name });
@@ -217,19 +224,18 @@ function movePlayer(player)
 	}
 }
 
-function addCreatures() {
-
+function addCreatures()
+{
 	addMice();
 	addSpiders();
 	addZombies();
-	// addDragons();
 	addPlayers();
-
 }
 
 
 
-io.on('connection', function (socket) {
+io.on('connection', function (socket)
+{
 	console.log('A user connected!', socket.handshake.query.type);
 
 	var type = socket.handshake.query.type;
@@ -247,16 +253,28 @@ io.on('connection', function (socket) {
 		}
 	};
 
-	socket.on('gotit', function (player) {
+	socket.on('gotit', function (player)
+	{
 	   console.log('[INFO] Player ' + player.name + ' connecting!');
-		if (util.findUserById(users, player.id) > -1) {
+		if (util.findUserById(users, player.id) > -1)
+		{
 			console.log('[INFO] Player ID is already connected, kicking.');
 			socket.disconnect();
-		} else if (!util.validNick(player.name)) {
+		}
+		else if (!util.validNick(player.name))
+		{
 			socket.emit('kick', 'Invalid username.');
 			socket.disconnect();
-		} else {
+		}
+		else
+		{
 			console.log('[INFO] Player ' + player.name + ' connected!');
+
+			if(!player.name)
+			{
+				player.name = util.randomName();
+			}
+
 			sockets[player.id] = socket;
 
 			currentPlayer = player;
@@ -276,12 +294,12 @@ io.on('connection', function (socket) {
 			currentPlayer.x =  position.x;
 			currentPlayer.y =  position.y;
 			currentPlayer.radius = radius;
-			currentPlayer.killed = {
-				mice: 0,
-				spiders: 0,
-				zombies: 0,
-				dragons: 0,
-				players: 0
+			currentPlayer.kills = {
+				mouse: 0,
+				spider: 0,
+				zombie: 0,
+				dragon: 0,
+				player: 0
 			};
 
 			users.push(currentPlayer);
@@ -294,23 +312,27 @@ io.on('connection', function (socket) {
 		}
 	});
 
-	socket.on('ping', function () {
+	socket.on('ping', function ()
+	{
 		socket.emit('pong');
 	});
 
-	socket.on('windowResized', function (data) {
+	socket.on('windowResized', function (data)
+	{
 		currentPlayer.screenWidth = data.screenWidth;
 		currentPlayer.screenHeight = data.screenHeight;
 	});
 
-	 socket.on('respawn', function () {
+	 socket.on('respawn', function ()
+	 {
 		  if (util.findUserById(users, currentPlayer.id) > -1)
 				users.splice(util.findUserById(users, currentPlayer.id), 1);
 		  socket.emit('welcome', currentPlayer, {xpLevels: conf.xpForLevel});
 		  console.log('[INFO] User ' + currentPlayer.name + ' respawned!');
 	 });
 
-	 socket.on('disconnect', function () {
+	 socket.on('disconnect', function ()
+	 {
 		  if (util.findUserById(users, currentPlayer.id) > -1)
 				users.splice(util.findUserById(users, currentPlayer.id), 1);
 		  console.log('[INFO] User ' + currentPlayer.name + ' disconnected!');
@@ -318,7 +340,8 @@ io.on('connection', function (socket) {
 		  socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
 	 });
 
-	 socket.on('playerChat', function(data) {
+	 socket.on('playerChat', function(data)
+	 {
 		  var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
 		  var _message = data.message.replace(/(<([^>]+)>)/ig, '');
 		  if (conf.logChat === 1) {
@@ -327,8 +350,10 @@ io.on('connection', function (socket) {
 		  socket.broadcast.emit('serverSendPlayerChat', {sender: _sender, message: _message.substring(0,35)});
 	 });
 
-	 socket.on('pass', function(data) {
-		  if (data[0] === conf.adminPass) {
+	 socket.on('pass', function(data)
+	 {
+		  if (data[0] === conf.adminPass)
+		  {
 				console.log('[ADMIN] ' + currentPlayer.name + ' just logged in as an admin!');
 				socket.emit('serverMSG', 'Welcome back ' + currentPlayer.name);
 				socket.broadcast.emit('serverMSG', currentPlayer.name + ' just logged in as admin!');
@@ -340,28 +365,29 @@ io.on('connection', function (socket) {
 		  }
 	 });
 
-	 socket.on('kick', function(data) {
-		  if (currentPlayer.admin) {
+	 socket.on('kick', function(data)
+	 {
+		  if (currentPlayer.admin)
+		  {
 				var reason = '';
 				var worked = false;
-				for (var e = 0; e < users.length; e++) {
-					 if (users[e].name === data[0] && !users[e].admin && !worked) {
+				for (var e = 0; e < users.length; e++)
+				{
+					 if (users[e].name === data[0] && !users[e].admin && !worked)
+					 {
 						  if (data.length > 1) {
-								for (var f = 1; f < data.length; f++) {
-									 if (f === data.length) {
+								for (var f = 1; f < data.length; f++)
+								{
+									 if (f === data.length)
 										  reason = reason + data[f];
-									 }
-									 else {
+									 else
 										  reason = reason + data[f] + ' ';
-									 }
 								}
 						  }
-						  if (reason !== '') {
+						  if (reason !== '')
 							  console.log('[ADMIN] User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name + ' for reason ' + reason);
-						  }
-						  else {
+						  else
 							  console.log('[ADMIN] User ' + users[e].name + ' kicked successfully by ' + currentPlayer.name);
-						  }
 						  socket.emit('serverMSG', 'User ' + users[e].name + ' was kicked by ' + currentPlayer.name);
 						  sockets[users[e].id].emit('kick', reason);
 						  sockets[users[e].id].disconnect();
@@ -369,10 +395,11 @@ io.on('connection', function (socket) {
 						  worked = true;
 				}
 			}
-			if (!worked) {
+			if (!worked)
 				socket.emit('serverMSG', 'Could not locate user or user is an admin.');
-			}
-		} else {
+		}
+		else
+		{
 			console.log('[ADMIN] ' + currentPlayer.name + ' is trying to use -kick but isn\'t an admin.');
 			socket.emit('serverMSG', 'You are not permitted to use this command.');
 		}
@@ -457,6 +484,8 @@ function attackFunc(p1, p2)
 
 	if(p2.type === 'zombie' || p2.type === 'dragon')
 	{
+		if(p2.type === 'dragon')
+			p2.state = 'attacking';
 		p2.target = p1;
 	}
 
@@ -473,7 +502,23 @@ function killFunc(creature)
 	creature.deadCounter = conf.counters.dead;
 }
 
-function tickPlayer(currentPlayer) {
+function distanceCheck(creature, others, distance, type)
+{
+	var minTarget = {}, minDist = distance;
+	for (var i = 0; i < others.length; i++)
+	{
+		var dist = util.getDistance(others[i], creature);
+		if(creature.id !== others[i].id  && !others[i].dead && dist < minDist)
+		{
+			minDist = dist;
+			minTarget =  {target: others[i], type: type};
+		}
+	}
+	return minTarget;
+}
+
+function tickPlayer(currentPlayer)
+{
 
 	if(currentPlayer.deadCounter >= 0)
 	{
@@ -483,9 +528,10 @@ function tickPlayer(currentPlayer) {
 	}
 
 	if(currentPlayer.projectileCounter >= 0)
-	{
 		--currentPlayer.projectileCounter;
-	}
+
+	if(currentPlayer.attackCounter >= 0)
+		currentPlayer.attackCounter--;
 
 
 	if(currentPlayer.lastHeartbeat < new Date().getTime() - conf.maxHeartbeatInterval) {
@@ -495,135 +541,67 @@ function tickPlayer(currentPlayer) {
 
 	movePlayer(currentPlayer);
 
-	if(currentPlayer.attackCounter >= 0)
-	{
-		currentPlayer.attackCounter--;
-	}
-
-
 	if(currentPlayer.type == 'fake' || currentPlayer.attacking === true)
 	{
-		var dist;
-		for (var i = 0; i < users.length; i++) {
-			dist = util.getDistance(users[i], currentPlayer);
-			if(currentPlayer.id !== users[i].id  && currentPlayer.attackCounter < 0 && !users[i].dead && dist < 0)
-			{
-				if(attackFunc(currentPlayer, users[i]) === "dead")
-				{
-					currentPlayer.playerKills++;
-					currentPlayer.xp += conf.xpForKill[users[i].level];
-				}
+		var target = distanceCheck(currentPlayer, users, 0, 'player');
+		if(!target.target) target = distanceCheck(currentPlayer, [dragon], 0, 'dragon');
+		if(!target.target) target = distanceCheck(currentPlayer, zombies, 0, 'zombie');
+		if(!target.target) target = distanceCheck(currentPlayer, spiders, 0, 'spider');
+		if(!target.target) target = distanceCheck(currentPlayer, mice, 0, 'mouse');
 
-			}
-		}
-
-		if(currentPlayer.attackCounter < 0 && !dragon.dead && util.getDistance(dragon, currentPlayer) < 0 && attackFunc(currentPlayer, dragon) === "dead")
+		if(target.target && currentPlayer.attackCounter < 0 && attackFunc(currentPlayer, target.target) === "dead")
 		{
+			if(target.type === 'player')
+				currentPlayer.xp += conf.xpForKill[target.target.level];
+			else
+				currentPlayer.xp += conf[target.type].xp;
+
+
 			if(currentPlayer.type === 'player')
 			{
-				currentPlayer.killed.dragons++;
-				let kills = currentPlayer.killed.dragons;
-				if(kills === 1)
-					sockets[currentPlayer.id].emit('achievement', {txt: 'Killed your first dragon!', counter: conf.counters.achievement});
-				else if (kills === 10 || kills === 50)
-					sockets[currentPlayer.id].emit('achievement', {txt: 'Killed '+kills+' dragons!', counter: conf.counters.achievement});
-			}
-			currentPlayer.xp += conf.dragon.xp;
-		}
-
-		for (i = 0; i < zombies.length; i++) {
-			dist = util.getDistance(zombies[i], currentPlayer);
-			if(currentPlayer.attackCounter < 0 && !zombies[i].dead && dist < 0)
-			{
-				if(attackFunc(currentPlayer, zombies[i]) === "dead")
+				currentPlayer.kills[target.type]++;
+				let kills = currentPlayer.kills[target.type];
+				let plural = target.type + 's';
+				if(target.type === 'mouse')
 				{
-					if(currentPlayer.type === 'player')
-					{
-						currentPlayer.killed.zombies++;
-						let kills = currentPlayer.killed.zombies;
-						if(kills === 1)
-							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed your first zombie!', counter: conf.counters.achievement});
-						else if (kills === 10 || kills === 50)
-							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed '+kills+' zombies!', counter: conf.counters.achievement});
-					}
-					currentPlayer.xp += conf.zombie.xp;
-				}
-
-			}
-		}
-
-		for (i = 0; i < spiders.length; i++) {
-			dist = util.getDistance(spiders[i], currentPlayer);
-			if(currentPlayer.attackCounter < 0 && !spiders[i].dead && dist < 0)
-			{
-				if(attackFunc(currentPlayer, spiders[i]) === "dead")
-				{
-					if(currentPlayer.type === 'player')
-					{
-						currentPlayer.killed.spiders++;
-						let kills = currentPlayer.killed.spiders;
-						if(kills === 1)
-							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed your first spider!', counter: conf.counters.achievement});
-						else if (kills === 10 || kills === 50)
-							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed '+kills+' spiders!', counter: conf.counters.achievement});
-					}
-					currentPlayer.xp += conf.spider.xp;
-				}
-
-			}
-		}
-
-		for (i = 0; i < mice.length; i++) {
-			dist = util.getDistance(mice[i], currentPlayer);
-			if(currentPlayer.attackCounter < 0 && !mice[i].dead && dist < 0)
-			{
-				if(attackFunc(currentPlayer, mice[i]) === "dead")
-				{
-					if(currentPlayer.type === 'player')
-					{
-						currentPlayer.killed.mice++;
-						let kills = currentPlayer.killed.mice;
-						if(kills === 1)
-							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed your first mouse!', counter: conf.counters.achievement});
-						else if (kills === 10 || kills === 50)
-							sockets[currentPlayer.id].emit('achievement', {txt: 'Killed '+kills+' mice!', counter: conf.counters.achievement});
-					}
-
-					currentPlayer.xp += conf.mouse.xp * (currentPlayer.type === 'fake' ? conf.fakeFactor: 1) ;
+					plural = 'mice';
 					currentPlayer.hp = Math.min(currentPlayer.maxHP, currentPlayer.hp + 5);
 				}
+
+				if(kills === 1)
+					sockets[currentPlayer.id].emit('achievement', {txt: 'kills your first '+ target.type  +'!', counter: conf.counters.achievement});
+				else if (kills === 10 || kills === 50)
+					sockets[currentPlayer.id].emit('achievement', {txt: 'kills '+kills+' '+ plural +'!', counter: conf.counters.achievement});
 			}
 		}
-	}
 
 
-
-	if(currentPlayer.xp > conf.xpForLevel[currentPlayer.level])
-	{
-		currentPlayer.level++;
-		currentPlayer.xp -= conf.xpForLevel[currentPlayer.level];
-
-
-		if(currentPlayer.level == 2)
+		if(currentPlayer.xp > conf.xpForLevel[currentPlayer.level])
 		{
-			if(currentPlayer.type === 'fake')
+			currentPlayer.xp -= conf.xpForLevel[currentPlayer.level];
+			currentPlayer.level++;
+
+
+			if(currentPlayer.level == 2)
 			{
-				var classes = ['mage', 'archer', 'knight'];
-				currentPlayer.class = classes[Math.floor(Math.random() * 3)];
+				if(currentPlayer.type === 'fake')
+				{
+					var classes = ['mage', 'archer', 'knight'];
+					currentPlayer.class = classes[Math.floor(Math.random() * 3)];
+				}
+				else
+				{
+					sockets[currentPlayer.id].emit('LVL2');
+				}
 			}
-			else
-			{
-				sockets[currentPlayer.id].emit('LVL2');
-			}
+
+			currentPlayer.hp += conf.playerHp[currentPlayer.level];
+			currentPlayer.maxHP += conf.playerHp[currentPlayer.level];
+			currentPlayer.speed += conf.playerSpeed[currentPlayer.level];
+			currentPlayer.attack += conf.playerAttack[currentPlayer.level];
+			currentPlayer.defense += conf.playerDefense[currentPlayer.level];
+			currentPlayer.radius = util.hpToRadius(currentPlayer.maxHP);
 		}
-
-		currentPlayer.hp += conf.playerHp[currentPlayer.level];
-		currentPlayer.maxHP += conf.playerHp[currentPlayer.level];
-		currentPlayer.speed += conf.playerSpeed[currentPlayer.level];
-		currentPlayer.attack += conf.playerAttack[currentPlayer.level];
-		currentPlayer.defense += conf.playerDefense[currentPlayer.level];
-
-		currentPlayer.radius = util.hpToRadius(currentPlayer.maxHP);
 	}
 }
 
@@ -657,7 +635,7 @@ function tickSpider(spider)
 		return;
 	}
 
-	var minDist = conf.spider.sight, minTarget, dist = 0;
+	var minDist = conf.spider.sight, dist = 0;
 
 	if(spider.attackCounter >= 0)
 	{
@@ -678,26 +656,25 @@ function tickSpider(spider)
 				}
 				if (spider.attack > users[i].defense && dist < minDist) {
 					minDist = dist;
-					minTarget = users[i];
+					spider.target = users[i];
 				}
 			}
 		}
 
 		if (minDist === conf.spider.sight)
 		{
-			minDist = 10000;
-			for(i = 0; i < mice.length; i++)
-			{
-				dist = util.getDistance(spider, mice[i]);
-				if(mice[i].dead !== true && dist < minDist)
-				{
-						minDist = dist;
-						minTarget = mice[i];
-				}
-			}
+			spider.target = distanceCheck(spider, mice, minDist).target;
+			// minDist = 10000;
+			// for(i = 0; i < mice.length; i++)
+			// {
+			// 	dist = util.getDistance(spider, mice[i]);
+			// 	if(mice[i].dead !== true && dist < minDist)
+			// 	{
+			// 			minDist = dist;
+			// 			minTarget = mice[i];
+			// 	}
+			// }
 		}
-
-		spider.target = minTarget;
 	}
 
 
@@ -1016,8 +993,8 @@ function gameloop() {
 		  	{
 		  		if (b.level !== a.level)
 			  		return b.level - a.level;
-			  	if(b.playerKills !== a.playerKills)
-		  			return b.playerKills - a.playerKills;
+			  	if(b.kills.player !== a.kills.player)
+		  			return b.kills.player - a.kills.player;
 	  			return b.xp - a.xp;
 			});
 
@@ -1131,11 +1108,13 @@ function sendUpdates() {
 						y: user.y,
 						hp: user.hp,
 						dead: user.dead,
+						name: user.name,
+						level: user.level,
 						class: user.class,
 						maxHP: user.maxHP,
-						direction: (user.target && user.target.x < 0 ? 'left' : 'right'),
 						radius: user.radius,
 						attacking: user.attackCounter > 0,
+						direction: (user.target && user.target.x < 0 ? 'left' : 'right'),
 					};
 				}
 			})

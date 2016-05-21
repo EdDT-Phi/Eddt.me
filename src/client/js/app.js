@@ -852,14 +852,17 @@ function drawTree(tree)
 // }
 
 
-function drawPlayers(users)
+function drawPlayers(users, debug)
 {
 
 	for(var user = 0; user < users.length; user++)
 	{
-		graph.beginPath();
-		graph.arc(users[user].x - player.x + screenWidth / 2, users[user].y - player.y + screenHeight / 2, users[user].radius, 0, 2 * Math.PI);
-		graph.stroke();
+		if(debug)
+		{
+			graph.beginPath();
+			graph.arc(users[user].x - player.x + screenWidth / 2, users[user].y - player.y + screenHeight / 2, users[user].radius, 0, 2 * Math.PI);
+			graph.stroke();
+		}
 
 		var useImage;
 		if(users[user].dead)
@@ -876,6 +879,12 @@ function drawPlayers(users)
 		}
 
 		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius), users[user].y - player.y + screenHeight / 2 - (users[user].radius)  , users[user].radius * 2, users[user].radius * 2);
+
+		graph.fillStyle='black';
+		graph.fillRect(0, screenHeight - 10, screenWidth, 10);
+		graph.font = '15px Arial';
+		var text = users[user].name + ' (' + users[user].level + ')';
+		graph.fillText(text, users[user].x - player.x + screenWidth / 2 - text.length * 3 ,  users[user].y - player.y + screenHeight / 2 - users[user].radius - 5);
 
 		graph.fillStyle='red';
 		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].radius*2, 5);
