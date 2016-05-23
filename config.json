@@ -55,27 +55,28 @@
     "defense": 4
   },
   "fire": {
+    "counter": 25,
     "speed": 15,
-    "damage": 75,
+    "damage": 20,
     "range": 1500,
     "radius": 75
   },
   "arrow": {
+    "counter": 50,
     "speed": 15,
-    "damage": 100,
+    "damage": 50,
     "range": 1500,
-    "radius": 75
+    "radius": 50
   },
   "playerHp": [100, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
   "playerSpeed": [5, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2],
-  "playerAttack" :  [4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  "playerDefense" : [4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  "playerAttack" :  [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  "playerDefense" : [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   "xpForLevel": [10, 20, 50, 100, 200, 500, 1000, 2000, 4000, 10000],
   "xpForKill": [5, 10, 20, 50, 100, 200, 400, 1000, 2000, 4000],
   "counters" : {
     "dead" : 40,
     "attack": 20,
-    "projectile": 50,
     "achievement": 100
   },
   "AIUsers" : 20,

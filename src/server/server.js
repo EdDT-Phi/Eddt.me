@@ -167,15 +167,16 @@ function movePlayer(player)
 		   		x: mice[i].x - player.x,
 		   		y: mice[i].y - player.y
 		   	};
+		   	player.moveTarget = player.target;
 		   	minDist = dist;
 		   }
 		}
 	}
 
-	if(!player.target) return;
+	if(!player.moveTarget) return;
 
-	dist = Math.sqrt(Math.pow(player.target.y, 2) + Math.pow(player.target.x, 2));
-	var deg = Math.atan2(player.target.y, player.target.x);
+	dist = Math.sqrt(Math.pow(player.moveTarget.y, 2) + Math.pow(player.moveTarget.x, 2));
+	var deg = Math.atan2(player.moveTarget.y, player.moveTarget.x);
 
 	// var slowDown = 1;
 	// if(player.speed <= 6.25)
@@ -283,7 +284,7 @@ io.on('connection', function (socket)
 			console.log(position);
 			var radius = util.hpToRadius(conf.playerHp[0]);
 			currentPlayer.dead = false;
-			currentPlayer.xp = 0;
+			currentPlayer.xp = 50;
 			currentPlayer.level = 0;
 			currentPlayer.class = 'peasant';
 			currentPlayer.hp = conf.playerHp[0];
@@ -428,50 +429,17 @@ io.on('connection', function (socket)
 
 	socket.on('space', function()
 	{
-		if(currentPlayer.projectileCounter < 0)
-		{
-			if(currentPlayer.class === 'mage')
-			{
-				currentPlayer.projectileCounter = conf.counters.projectile;
-				projectiles.push(
-				{
-					type: "fire",
-					x: currentPlayer.x,
-					y: currentPlayer.y,
-					speed: conf.fire.speed,
-					range: conf.fire.range,
-					userId: currentPlayer.id,
-					radius: conf.fire.radius,
-					damage: conf.fire.damage,
-					direction: util.getDirection({x:0, y:0}, currentPlayer.target),
-				});
-			}
-			else if(currentPlayer.class === 'archer')
-			{
-				currentPlayer.projectileCounter = conf.counters.projectile;
-				projectiles.push(
-				{
-					type: "arrow",
-					x: currentPlayer.x,
-					y: currentPlayer.y,
-					speed: conf.arrow.speed,
-					range: conf.arrow.range,
-					userId: currentPlayer.id,
-					radius: conf.arrow.radius,
-					damage: conf.arrow.damage,
-					direction: util.getDirection({x:0, y:0}, currentPlayer.target),
-				});
-			}
-		}
+
 	});
 
 	// Heartbeat function, update everytime.
-	socket.on('0', function(target) {
+	socket.on('0', function(target,  moveTarget) {
 		currentPlayer.lastHeartbeat = new Date().getTime();
 		// console.log(target);
-		if (target.x !== currentPlayer.x || target.y !== currentPlayer.y) {
-			currentPlayer.target = target;
-		}
+		// if (moveTarget.x !== currentPlayer.x || moveTarget.y !== currentPlayer.y) {
+		currentPlayer.moveTarget = moveTarget;
+		currentPlayer.target = target;
+		// }
 	});
 });
 
@@ -491,15 +459,45 @@ function attackFunc(p1, p2)
 
 	if(p2.hp === 0)
 	{
-		killFunc(p2);
+		killFunc(p2, p1);
 		return "dead";
 	}
 }
 
-function killFunc(creature)
+function killFunc(creature, player)
 {
 	creature.dead = true;
 	creature.deadCounter = conf.counters.dead;
+
+	if(player.type === 'fake' || player.type === 'player')
+	{
+
+		if(creature.type === 'player' || creature.type === 'fake')
+			player.xp += conf.xpForKill[creature.level];
+		else
+			player.xp += conf[creature.type].xp;
+
+
+		if(player.type === 'player')
+		{
+			if(creature.type === 'fake')
+				player.kills.player++;
+			else
+				player.kills[creature.type]++;
+			let kills = player.kills[creature.type];
+			let plural = creature.type + 's';
+			if(creature.type === 'mouse')
+			{
+				plural = 'mice';
+				player.hp = Math.min(player.maxHP, player.hp + 5);
+			}
+
+			if(kills === 1)
+				sockets[player.id].emit('achievement', {txt: 'Killed your first '+ creature.type  +'!', counter: conf.counters.achievement});
+			else if (kills === 10 || kills === 50)
+				sockets[player.id].emit('achievement', {txt: 'Killed '+kills+' '+ plural +'!', counter: conf.counters.achievement});
+		}
+	}
 }
 
 function distanceCheck(creature, others, distance, type)
@@ -527,9 +525,6 @@ function tickPlayer(currentPlayer)
 		return;
 	}
 
-	if(currentPlayer.projectileCounter >= 0)
-		--currentPlayer.projectileCounter;
-
 	if(currentPlayer.attackCounter >= 0)
 		currentPlayer.attackCounter--;
 
@@ -543,35 +538,47 @@ function tickPlayer(currentPlayer)
 
 	if(currentPlayer.type == 'fake' || currentPlayer.attacking === true)
 	{
-		var target = distanceCheck(currentPlayer, users, 0, 'player');
-		if(!target.target) target = distanceCheck(currentPlayer, [dragon], 0, 'dragon');
-		if(!target.target) target = distanceCheck(currentPlayer, zombies, 0, 'zombie');
-		if(!target.target) target = distanceCheck(currentPlayer, spiders, 0, 'spider');
-		if(!target.target) target = distanceCheck(currentPlayer, mice, 0, 'mouse');
 
-		if(target.target && currentPlayer.attackCounter < 0 && attackFunc(currentPlayer, target.target) === "dead")
+		if(currentPlayer.attackCounter < 0)
 		{
-			if(target.type === 'player')
-				currentPlayer.xp += conf.xpForKill[target.target.level];
-			else
-				currentPlayer.xp += conf[target.type].xp;
-
-
-			if(currentPlayer.type === 'player')
+			var type;
+			if(currentPlayer.class === 'mage')
 			{
-				currentPlayer.kills[target.type]++;
-				let kills = currentPlayer.kills[target.type];
-				let plural = target.type + 's';
-				if(target.type === 'mouse')
-				{
-					plural = 'mice';
-					currentPlayer.hp = Math.min(currentPlayer.maxHP, currentPlayer.hp + 5);
-				}
+				type = 'fire';
+			}
+			else if(currentPlayer.class === 'archer')
+			{
+				type = 'arrow';
+			}
 
-				if(kills === 1)
-					sockets[currentPlayer.id].emit('achievement', {txt: 'kills your first '+ target.type  +'!', counter: conf.counters.achievement});
-				else if (kills === 10 || kills === 50)
-					sockets[currentPlayer.id].emit('achievement', {txt: 'kills '+kills+' '+ plural +'!', counter: conf.counters.achievement});
+			if(type)
+			{
+				currentPlayer.attackCounter = conf[type].counter;
+				projectiles.push(
+				{
+					x: currentPlayer.x,
+					y: currentPlayer.y,
+					userId: currentPlayer.id,
+					direction: util.getDirection({x:0, y:0}, currentPlayer.target),
+					type: type,
+					speed: conf[type].speed,
+					range: conf[type].range,
+					radius: conf[type].radius,
+					damage: conf[type].damage,
+				});
+			}
+			else
+			{
+				var target = distanceCheck(currentPlayer, users, 0, 'player');
+				if(!target.target) target = distanceCheck(currentPlayer, [dragon], 0, 'dragon');
+				if(!target.target) target = distanceCheck(currentPlayer, zombies, 0, 'zombie');
+				if(!target.target) target = distanceCheck(currentPlayer, spiders, 0, 'spider');
+				if(!target.target) target = distanceCheck(currentPlayer, mice, 0, 'mouse');
+
+				if(target.target && currentPlayer.attackCounter < 0 && attackFunc(currentPlayer, target.target) === "dead")
+				{
+
+				}
 			}
 		}
 
@@ -879,9 +886,7 @@ function tickProjectile(projectile)
 		{
 			users[i].hp -= projectile.damage;
 			if(users[i].hp <= 0)
-			{
-				killFunc(users[i]);
-			}
+				killFunc(users[i], users[util.findUserById(users, projectile.userId)]);
 			return "dead";
 		}
 	}
@@ -894,9 +899,7 @@ function tickProjectile(projectile)
 		{
 			zombies[i].hp -= projectile.damage;
 			if(zombies[i].hp <= 0)
-			{
-				killFunc(zombies[i]);
-			}
+				killFunc(zombies[i], users[util.findUserById(users, projectile.userId)]);
 			return "dead";
 		}
 	}
@@ -906,9 +909,7 @@ function tickProjectile(projectile)
 		{
 			spiders[i].hp -= projectile.damage;
 			if(spiders[i].hp <= 0)
-			{
-				killFunc(spiders[i]);
-			}
+				killFunc(spiders[i], users[util.findUserById(users, projectile.userId)]);
 			return "dead";
 		}
 	}
@@ -918,9 +919,7 @@ function tickProjectile(projectile)
 		{
 			mice[i].hp -= projectile.damage;
 			if(mice[i].hp <= 0)
-			{
-				killFunc(mice[i]);
-			}
+				killFunc(mice[i], users[util.findUserById(users, projectile.userId)]);
 			return "dead";
 		}
 	}

@@ -12,6 +12,10 @@ var KEY_LEFT = 37;
 var KEY_UP = 38;
 var KEY_RIGHT = 39;
 var KEY_DOWN = 40;
+var KEY_W = 87;
+var KEY_A = 65;
+var KEY_S = 83;
+var KEY_D = 68;
 var borderDraw = true;
 var animLoopHandle;
 var mobile = false;
@@ -77,8 +81,10 @@ classes.peasant.image.src = 'img/peasant.png';
 classes.peasant.attack.image.src = 'img/peasant_attack.png';
 classes.archer.image.src = 'img/archer.png';
 // classes.archer.attack.image.src = 'img/archer_attack.png';
+classes.archer.attack.image.src = 'img/archer.png';
 classes.mage.image.src = 'img/mage.png';
 // classes.mage.attack.image.src = 'img/mage_attack.png';
+classes.mage.attack.image.src = 'img/mage.png';
 
 var tree = {
   image: new Image(),
@@ -224,7 +230,8 @@ var player = {
 	y: screenHeight / 2,
 	screenWidth: screenWidth,
 	screenHeight: screenHeight,
-	target: {x: screenWidth / 2, y: screenHeight / 2}
+	moveTarget: {x: screenWidth / 2, y: screenHeight / 2},
+	attackTarget: {x: screenWidth / 2, y: screenHeight / 2}
 };
 
 var thisPlayer;
@@ -239,8 +246,8 @@ var xpLevels = [];
 var achievements = [];
 
 var leaderboard = [];
-var target = {x: player.x, y: player.y};
-var directionLock = false;
+var moveTarget = {x: player.x, y: player.y};
+var attackTarget = {x: player.x, y: player.y};
 var directions = [];
 
 var c = document.getElementById('cvs');
@@ -439,7 +446,7 @@ $('#mage' ).click(function() {
 function directionDown(event) {
 	var key = event.which || event.keyCode;
 
-	console.log(key);
+	// console.log(key);
 
 	if (key === KEY_SPACE) {
 		socket.emit('space');
@@ -447,10 +454,9 @@ function directionDown(event) {
 	else if (key === KEY_ENTER) {
 		document.getElementById('chatInput').focus();
 	} else if (directional(key)) {
-		directionLock = true;
 		if (newDirection(key,directions, true)) {
 			updateTarget(directions);
-			socket.emit('0', target);
+			// socket.emit('0', target);
 		}
 	}
 }
@@ -461,8 +467,8 @@ function directionUp(event) {
 	if (directional(key)) {
 		if (newDirection(key,directions, false)) {
 			updateTarget(directions);
-			if (directions.length === 0) directionLock = false;
-			socket.emit('0', target);
+			// if (directions.length === 0) directionLock = false;
+			// socket.emit('0', moveTarget);
 		}
 	}
 }
@@ -493,21 +499,21 @@ function newDirection(direction, list, isAddition) {
 
 // Updates the target according to the directions in the directions array.
 function updateTarget(list) {
-	target = { x : 0, y: 0 };
+	moveTarget = { x : 0, y: 0 };
 	var directionHorizontal = 0;
 	var directionVertical = 0;
 	for (var i = 0, len = list.length; i < len; i++) {
 		if (directionHorizontal === 0) {
-			if (list[i] == KEY_LEFT) directionHorizontal -= Number.MAX_VALUE;
-			else if (list[i] == KEY_RIGHT) directionHorizontal += Number.MAX_VALUE;
+			if (list[i] === KEY_LEFT || list[i] === KEY_A) directionHorizontal -= Number.MAX_VALUE;
+			else if (list[i] == KEY_RIGHT || list[i] === KEY_D) directionHorizontal += Number.MAX_VALUE;
 		}
 		if (directionVertical === 0) {
-			if (list[i] == KEY_UP) directionVertical -= Number.MAX_VALUE;
-			else if (list[i] == KEY_DOWN) directionVertical += Number.MAX_VALUE;
+			if (list[i] === KEY_UP  || list[i] === KEY_W) directionVertical -= Number.MAX_VALUE;
+			else if (list[i] === KEY_DOWN  || list[i] === KEY_S) directionVertical += Number.MAX_VALUE;
 		}
 	}
-	target.x += directionHorizontal;
-	target.y += directionVertical;
+	moveTarget.x += directionHorizontal;
+	moveTarget.y += directionVertical;
 }
 
 function directional(key) {
@@ -515,11 +521,11 @@ function directional(key) {
 }
 
 function horizontal(key) {
-	return key == KEY_LEFT || key == KEY_RIGHT;
+	return key == KEY_LEFT || key == KEY_RIGHT || key == KEY_A || key == KEY_D;
 }
 
 function vertical(key) {
-	return key == KEY_DOWN || key == KEY_UP;
+	return key == KEY_DOWN || key == KEY_UP || key == KEY_W || key == KEY_S;
 }
 function checkLatency() {
 	// Ping.
@@ -602,32 +608,37 @@ chat.registerCommand('kick', 'Kick a player, for admins only.', function (args) 
 
 
 // socket stuff.
-function setupSocket(socket) {
+function setupSocket(socket)
+{
 	// Handle ping.
-	socket.on('pong', function () {
+	socket.on('pong', function ()
+	{
 		var latency = Date.now() - startPingTime;
-		debug('Latency: ' + latency + 'ms');
+		// debug('Latency: ' + latency + 'ms');
 		chat.addSystemLine('Ping: ' + latency + 'ms');
 	});
 
 	// Handle error.
-	socket.on('connect_failed', function () {
+	socket.on('connect_failed', function ()
+	{
 		socket.close();
 		disconnected = true;
 	});
 
-	socket.on('disconnect', function () {
+	socket.on('disconnect', function ()
+	{
 		socket.close();
 		disconnected = true;
 	});
 
 	// Handle connection.
-	socket.on('welcome', function (playerSettings, settings) {
+	socket.on('welcome', function (playerSettings, settings)
+	{
 		player = playerSettings;
 		player.name = playerName;
 		player.screenWidth = screenWidth;
 		player.screenHeight = screenHeight;
-		player.target = target;
+		player.moveTarget = moveTarget;
 		xpLevels = settings.xpLevels;
 
 		socket.emit('gotit', player);
@@ -635,41 +646,51 @@ function setupSocket(socket) {
 		debug('Game started at: ' + gameStart);
 		chat.addSystemLine('Connected to the game!');
 		chat.addSystemLine('Type <b>-help</b> for a list of commands.');
-		if (mobile) {
+		if (mobile)
+		{
 			document.getElementById('gameAreaWrapper').removeChild(document.getElementById('chatbox'));
 		}
 		c.focus();
 	});
 
-	socket.on('gameSetup', function(data) {
+	socket.on('gameSetup', function(data)
+	{
 		gameWidth = data.gameWidth;
 		gameHeight = data.gameHeight;
 		resize();
 	});
 
-	socket.on('playerDied', function (data) {
+	socket.on('playerDied', function (data)
+	{
 		chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> was eaten.');
 	});
 
-	socket.on('playerDisconnect', function (data) {
+	socket.on('playerDisconnect', function (data)
+	{
 		chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> disconnected.');
 	});
 
-	socket.on('playerJoin', function (data) {
+	socket.on('playerJoin', function (data)
+	{
 		chat.addSystemLine('{GAME} - <b>' + (data.name.length < 1 ? 'An unnamed cell' : data.name) + '</b> joined.');
 	});
 
-	socket.on('leaderboard', function (data) {
+	socket.on('leaderboard', function (data)
+	{
 		leaderboard = data.leaderboard;
 		var status = '<span class="title">Leaderboard</span>';
-		for (var i = 0; i < leaderboard.length; i++) {
+		for (var i = 0; i < leaderboard.length; i++)
+		{
 			status += '<br />';
-			if (leaderboard[i].id == player.id){
+			if (leaderboard[i].id == player.id)
+			{
 				if(leaderboard[i].name.length !== 0)
 					status += '<span class="me">' + (i + 1) + '. ' + leaderboard[i].name + ' (' + leaderboard[i].level+')</span>';
 				else
 					status += '<span class="me">' + (i + 1) + '. Unnamed Freak (' + leaderboard[i].level+')</span>';
-			} else {
+			}
+			else
+			{
 				if(leaderboard[i].name.length !== 0)
 					status += (i + 1) + '. ' + leaderboard[i].name+ ' (' + leaderboard[i].level+')';
 				else
@@ -680,7 +701,8 @@ function setupSocket(socket) {
 		document.getElementById('status').innerHTML = status;
 	});
 
-	socket.on('serverMSG', function (data) {
+	socket.on('serverMSG', function (data)
+	 {
 		chat.addSystemLine(data);
 	});
 
@@ -822,7 +844,7 @@ function drawProjectile(projectile, debug)
 	}
 
 	graph.rotate(projectile.direction);
-	console.log(projectile);
+	// console.log(projectile);
 	graph.drawImage(projectile_types[projectile.type].image, -projectile.radius/2 , -projectile.radius/2 ,projectile.radius, projectile.radius);
 	graph.restore();
 }
@@ -982,19 +1004,20 @@ function drawAchievements()
 
 
 function gameInput(mouse) {
-	if (!directionLock) {
-		target.x = mouse.clientX - screenWidth / 2;
-		target.y = mouse.clientY - screenHeight / 2;
-	}
+	// if (!directionLock) {
+		attackTarget.x = mouse.clientX - screenWidth / 2;
+		attackTarget.y = mouse.clientY - screenHeight / 2;
+		debug('attackTarget');
+	// }
 }
 
 function touchInput(touch) {
 	touch.preventDefault();
 	touch.stopPropagation();
-	if (!directionLock) {
-		target.x = touch.touches[0].clientX - screenWidth / 2;
-		target.y = touch.touches[0].clientY - screenHeight / 2;
-	}
+	// if (!directionLock) {
+		attackTarget.x = touch.touches[0].clientX - screenWidth / 2;
+		attackTarget.y = touch.touches[0].clientY - screenHeight / 2;
+	// }
 }
 
 window.requestAnimFrame = (function() {
@@ -1041,7 +1064,6 @@ function gameLoop() {
 			projectiles.forEach(drawProjectile);
 			drawAchievements();
 
-			// console.log(dragons[0].x, dragons[0].y);
 			drawborder();
 
 
@@ -1050,7 +1072,7 @@ function gameLoop() {
 			});
 
 			drawPlayers(users);
-			socket.emit('0', target); // playerSendTarget 'Heartbeat'.
+			socket.emit('0', attackTarget, moveTarget); // playerSendTarget 'Heartbeat'.
 
 			drawXPbar();
 

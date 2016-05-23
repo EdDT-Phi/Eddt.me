@@ -82,13 +82,15 @@ exports.newPlayerPos = function(radius)
 exports.findUserById = function(arr, id) {
 	var len = arr.length;
 
+	// console.log('looking for: ', id);
 	while (len--) {
 		if (arr[len].id === id) {
 			return len;
 		}
 	}
 
-	return -1;
+	// console.log('not found: ', id);
+	return undefined;
 };
 
 exports.randomColor = function() {
