@@ -284,7 +284,7 @@ io.on('connection', function (socket)
 			console.log(position);
 			var radius = util.hpToRadius(conf.playerHp[0]);
 			currentPlayer.dead = false;
-			currentPlayer.xp = 50;
+			currentPlayer.xp = 0;
 			currentPlayer.level = 0;
 			currentPlayer.class = 'peasant';
 			currentPlayer.hp = conf.playerHp[0];
@@ -469,7 +469,8 @@ function killFunc(creature, player)
 	creature.dead = true;
 	creature.deadCounter = conf.counters.dead;
 
-	if(player.type === 'fake' || player.type === 'player')
+
+	if(player && (player.type === 'fake' || player.type === 'player'))
 	{
 
 		if(creature.type === 'player' || creature.type === 'fake')
@@ -486,10 +487,12 @@ function killFunc(creature, player)
 				player.kills[creature.type]++;
 			let kills = player.kills[creature.type];
 			let plural = creature.type + 's';
+
+
 			if(creature.type === 'mouse')
 			{
 				plural = 'mice';
-				player.hp = Math.min(player.maxHP, player.hp + 5);
+				player.hp = Math.min(player.maxHP, player.hp + 5 * (player.type==='fake'? 5 : 1));
 			}
 
 			if(kills === 1)

@@ -51,40 +51,53 @@ projectile_types.arrow.image.src = 'img/arrow.png';
 var classes = {
 	knight : {
 	  	image: new Image(),
-		attack : {
-		  	image: new Image()
-		}
+		attack_image: new Image(),
+		image_left: new Image(),
+		attack_image_left: new Image(),
 	},
 	peasant : {
 	  	image: new Image(),
-		attack : {
-		  image: new Image()
-		}
+		attack_image: new Image(),
+		image_left: new Image(),
+		attack_image_left: new Image(),
 	},
 	mage : {
 	  	image: new Image(),
-		attack : {
-		  image: new Image()
-		}
+		attack_image: new Image(),
+		image_left: new Image(),
+		attack_image_left: new Image(),
 	},
 	archer : {
 	  	image: new Image(),
-		attack : {
-		  image: new Image()
-		}
+		attack_image: new Image(),
+		image_left: new Image(),
+		attack_image_left: new Image(),
 	},
 };
 
 classes.knight.image.src = 'img/knight.png';
-classes.knight.attack.image.src = 'img/knight_attack.png';
+classes.knight.attack_image.src = 'img/knight_attack.png';
+classes.knight.image_left.src = 'img/knight_left.png';
+classes.knight.attack_image_left.src = 'img/knight_attack_left.png';
+
 classes.peasant.image.src = 'img/peasant.png';
-classes.peasant.attack.image.src = 'img/peasant_attack.png';
+classes.peasant.attack_image.src = 'img/peasant_attack.png';
+classes.peasant.image_left.src = 'img/peasant_left.png';
+classes.peasant.attack_image_left.src = 'img/peasant_attack_left.png';
+
 classes.archer.image.src = 'img/archer.png';
-// classes.archer.attack.image.src = 'img/archer_attack.png';
-classes.archer.attack.image.src = 'img/archer.png';
+// classes.archer.attack_image.src = 'img/archer_attack.png';
+classes.archer.attack_image.src = 'img/archer.png';
+classes.archer.image_left.src = 'img/archer_left.png';
+// classes.archer.attack_image_left.src = 'img/archer_attack_left.png';
+classes.archer.attack_image_left.src = 'img/archer_left.png';
+
 classes.mage.image.src = 'img/mage.png';
-// classes.mage.attack.image.src = 'img/mage_attack.png';
-classes.mage.attack.image.src = 'img/mage.png';
+// classes.mage.attack_image.src = 'img/mage_attack.png';
+classes.mage.attack_image.src = 'img/mage.png';
+classes.mage.image_left.src = 'img/mage_left.png';
+// classes.mage.attack_image_left.src = 'img/mage_attack_left.png';
+classes.mage.attack_image_left.src = 'img/mage_left.png';
 
 var tree = {
   image: new Image(),
@@ -893,11 +906,14 @@ function drawPlayers(users, debug)
 		}
 		else
 		{
+			var left = '';
+			if(users[user].direction == 'left')
+				left = '_left';
 			var char = classes[users[user].class];
 			if(users[user].attacking)
-				useImage = char.attack.image;
+				useImage = char['attack_image' + left];
 			else
-				useImage = char.image;
+				useImage = char['image' + left];
 		}
 
 		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius), users[user].y - player.y + screenHeight / 2 - (users[user].radius)  , users[user].radius * 2, users[user].radius * 2);
