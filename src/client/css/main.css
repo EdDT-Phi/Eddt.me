@@ -21,24 +21,6 @@ div {
     -ms-user-select: none; /* IE10+ */
 }
 
-#split {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    width: 100px;
-    height: 100px;
-    padding: 5px;
-}
-
-#feed {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 100px;
-    height: 100px;
-    padding: 5px;
-}
-
 #archer {
     position: absolute;
     bottom: 10px;
@@ -61,6 +43,24 @@ div {
     position: absolute;
     bottom: 10px;
     right: 210px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
+#lightning {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
+#fire {
+    position: absolute;
+    bottom: 10px;
+    right: 110px;
     width: 100px;
     height: 100px;
     padding: 5px;

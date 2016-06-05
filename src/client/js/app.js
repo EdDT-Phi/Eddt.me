@@ -42,11 +42,15 @@ var projectile_types = {
   	},
   	arrow: {
   		image: new Image()
+  	},
+  	lightning: {
+  		image: new Image()
   	}
 };
 
 projectile_types.fire.image.src = 'img/fire.png';
 projectile_types.arrow.image.src = 'img/arrow.png';
+projectile_types.lightning.image.src = 'img/lightning.png';
 
 var classes = {
 	knight : {
@@ -127,13 +131,15 @@ var debug = function(args) {
 	}
 };
 
-if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
+{
 	mobile = true;
 }
 
 function startGame(type) {
 	playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0,25);
 	playerType = type;
+
 
 	screenWidth = window.innerWidth;
 	screenHeight = window.innerHeight;
@@ -149,7 +155,7 @@ function startGame(type) {
 	}
 	if (!animLoopHandle)
 		animloop();
-	socket.emit('respawn');
+	socket.emit('respawn', type);
 }
 
 // Checks if the nick chosen contains valid alphanumeric characters (and underscores).
@@ -166,7 +172,7 @@ window.onload = function() {
 		nickErrorText = document.querySelector('#startMenu .input-error');
 
 	btnS.onclick = function () {
-		startGame('spectate');
+		startGame('spectator');
 	};
 	btn.onclick = function () {
 
@@ -435,6 +441,8 @@ function hideAll()
 	document.getElementById('archer').style.visibility = 'hidden';
 	document.getElementById('knight').style.visibility = 'hidden';
 	document.getElementById('mage').style.visibility = 'hidden';
+	document.getElementById('fire').style.visibility = 'hidden';
+	document.getElementById('lightning').style.visibility = 'hidden';
 }
 
 $('#archer' ).click(function() {
@@ -451,6 +459,18 @@ $('#knight' ).click(function() {
 
 $('#mage' ).click(function() {
 		socket.emit('upgrade', 'mage');
+		hideAll();
+		c.focus();
+});
+
+$('#lightning' ).click(function() {
+		socket.emit('skill', 'lightning');
+		hideAll();
+		c.focus();
+});
+
+$('#fire' ).click(function() {
+		socket.emit('skill', 'fire');
 		hideAll();
 		c.focus();
 });
@@ -475,10 +495,13 @@ function directionDown(event) {
 }
 
 // Function called when a key is lifted, will change direction if arrow key.
-function directionUp(event) {
+function directionUp(event)
+{
 	var key = event.which || event.keyCode;
-	if (directional(key)) {
-		if (newDirection(key,directions, false)) {
+	if (directional(key))
+	{
+		if (newDirection(key,directions, false))
+		{
 			updateTarget(directions);
 			// if (directions.length === 0) directionLock = false;
 			// socket.emit('0', moveTarget);
@@ -517,12 +540,12 @@ function updateTarget(list) {
 	var directionVertical = 0;
 	for (var i = 0, len = list.length; i < len; i++) {
 		if (directionHorizontal === 0) {
-			if (list[i] === KEY_LEFT || list[i] === KEY_A) directionHorizontal -= Number.MAX_VALUE;
-			else if (list[i] == KEY_RIGHT || list[i] === KEY_D) directionHorizontal += Number.MAX_VALUE;
+			if (list[i] === KEY_LEFT || list[i] === KEY_A) directionHorizontal -= 1;
+			else if (list[i] == KEY_RIGHT || list[i] === KEY_D) directionHorizontal += 1;
 		}
 		if (directionVertical === 0) {
-			if (list[i] === KEY_UP  || list[i] === KEY_W) directionVertical -= Number.MAX_VALUE;
-			else if (list[i] === KEY_DOWN  || list[i] === KEY_S) directionVertical += Number.MAX_VALUE;
+			if (list[i] === KEY_UP  || list[i] === KEY_W) directionVertical -= 1;
+			else if (list[i] === KEY_DOWN  || list[i] === KEY_S) directionVertical += 1;
 		}
 	}
 	moveTarget.x += directionHorizontal;
@@ -648,6 +671,15 @@ function setupSocket(socket)
 	socket.on('welcome', function (playerSettings, settings)
 	{
 		player = playerSettings;
+
+		if(playerType === 'spectator')
+		{
+			player.x = gameWidth/2;
+			player.x = gameHeight/2;
+		}
+
+		console.log(gameWidth, gameHeight);
+
 		player.name = playerName;
 		player.screenWidth = screenWidth;
 		player.screenHeight = screenHeight;
@@ -670,6 +702,13 @@ function setupSocket(socket)
 	{
 		gameWidth = data.gameWidth;
 		gameHeight = data.gameHeight;
+
+		if(playerType === 'spectator')
+		{
+			player.x = gameWidth/2;
+			player.y = gameHeight/2;
+		}
+
 		resize();
 	});
 
@@ -730,14 +769,8 @@ function setupSocket(socket)
 	{
 		if(playerType == 'player')
 		{
-			var xoffset = player.x - playerData.x;
-			var yoffset = player.y - playerData.y;
-
 			player.x = playerData.x;
 			player.y = playerData.y;
-			player.massTotal = playerData.massTotal;
-			player.xoffset = isNaN(xoffset) ? 0 : xoffset;
-			player.yoffset = isNaN(yoffset) ? 0 : yoffset;
 		}
 
 		users = visible.players;
@@ -777,10 +810,16 @@ function setupSocket(socket)
 
 	socket.on('LVL2', function ()
 	{
-		console.log('yay!');
 		document.getElementById('archer').style.visibility = 'visible';
 		document.getElementById('knight').style.visibility = 'visible';
 		document.getElementById('mage').style.visibility = 'visible';
+	});
+
+
+	socket.on('LVL5', function (one, two)
+	{
+		document.getElementById(one).style.visibility = 'visible';
+		document.getElementById(two).style.visibility = 'visible';
 	});
 
 
@@ -814,6 +853,7 @@ function drawCircle(centerX, centerY, radius, sides)
 function drawCreature(creature, image, debug)
 {
 	graph.save();
+
 	graph.translate(creature.x - player.x + screenWidth / 2, creature.y - player.y + screenHeight / 2); // change origin
 
 	var useImage;
@@ -852,13 +892,19 @@ function drawProjectile(projectile, debug)
 	if(debug)
 	{
 		graph.beginPath();
-		graph.arc(0, 0, 50, 0, 2 * Math.PI);
+		graph.arc(0, 0, projectile.radius, 0, 2 * Math.PI);
 		graph.stroke();
 	}
 
 	graph.rotate(projectile.direction);
 	// console.log(projectile);
-	graph.drawImage(projectile_types[projectile.type].image, -projectile.radius/2 , -projectile.radius/2 ,projectile.radius, projectile.radius);
+
+	if(projectile.type === 'lightning')
+	{
+		graph.drawImage(projectile_types[projectile.type].image, 0, 0, 20, projectile.dist);
+	}
+	else
+		graph.drawImage(projectile_types[projectile.type].image, -projectile.radius, -projectile.radius,projectile.radius*2, projectile.radius*2);
 	graph.restore();
 }
 
@@ -914,6 +960,11 @@ function drawPlayers(users, debug)
 				useImage = char['attack_image' + left];
 			else
 				useImage = char['image' + left];
+
+			graph.fillStyle='red';
+			graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].radius*2, 5);
+			graph.fillStyle='green';
+			graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].hp/users[user].maxHP * users[user].radius*2, 5);
 		}
 
 		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius), users[user].y - player.y + screenHeight / 2 - (users[user].radius)  , users[user].radius * 2, users[user].radius * 2);
@@ -923,21 +974,28 @@ function drawPlayers(users, debug)
 		graph.font = '15px Arial';
 		var text = users[user].name + ' (' + users[user].level + ')';
 		graph.fillText(text, users[user].x - player.x + screenWidth / 2 - text.length * 3 ,  users[user].y - player.y + screenHeight / 2 - users[user].radius - 5);
-
-		graph.fillStyle='red';
-		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].radius*2, 5);
-		graph.fillStyle='green';
-		graph.fillRect(users[user].x - player.x + screenWidth / 2 - users[user].radius , users[user].y - player.y + screenHeight / 2 + users[user].radius , users[user].hp/users[user].maxHP * users[user].radius*2, 5);
 	}
 }
 
 function drawGrass()
 {
 	var i = 0;
-	for (var x = xoffset - player.x; x < screenWidth; x += screenHeight / 4)
+
+	var times = 4;
+
+	if(playerType === 'spectator')
+	{
+		times = 20;
+	}
+
+	var tempx = player.x || screenWidth / 2;
+	var tempy = player.y || screenHeight / 2;
+
+
+	for (var x = xoffset - tempx; x < screenWidth; x += screenHeight / times)
 	{
 	  var j = 0;
-	  for (var y = yoffset - player.y ; y < screenHeight; y += screenHeight / 4)
+	  for (var y = yoffset - tempy ; y < screenHeight; y += screenHeight / times)
 	  {
 			if(((i + j) % 2) === 0)
 				graph.drawImage(grass.image, x , y ,grass.size, grass.size);
@@ -1023,7 +1081,7 @@ function gameInput(mouse) {
 	// if (!directionLock) {
 		attackTarget.x = mouse.clientX - screenWidth / 2;
 		attackTarget.y = mouse.clientY - screenHeight / 2;
-		debug('attackTarget');
+		// debug('attackTarget');
 	// }
 }
 
@@ -1078,19 +1136,21 @@ function gameLoop() {
 			zombies.forEach(function(creature){drawCreature(creature, zombie);});
 			dragons.forEach(function(creature){drawCreature(creature, dragon);});
 			projectiles.forEach(drawProjectile);
-			drawAchievements();
 
+			drawAchievements();
 			drawborder();
 
-
 			users.sort(function(obj1,obj2) {
-				return obj1.mass - obj2.mass;
+				return obj1.level - obj2.level;
 			});
 
 			drawPlayers(users);
-			socket.emit('0', attackTarget, moveTarget); // playerSendTarget 'Heartbeat'.
 
-			drawXPbar();
+			if(playerType === 'player')
+			{
+				socket.emit('0', attackTarget, moveTarget); // playerSendTarget 'Heartbeat'.
+				drawXPbar();
+			}
 
 		} else {
 			graph.fillStyle = '#333333';

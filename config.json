@@ -9,22 +9,22 @@
     "amount" : 200
   },
   "spider": {
-    "xp" : 15,
+    "xp" : 20,
     "hp" : 100,
-    "speed" : 3,
-    "attack" : 5,
-    "defense" : 5,
+    "speed" : 4,
+    "attack" : 6,
+    "defense" : 6,
     "sight": 300,
-    "amount" : 20
+    "amount" : 10
   },
   "zombie": {
     "xp" : 15,
-    "hp" : 100,
+    "hp" : 150,
     "speed" : 4,
     "attack" : 10,
     "defense" : 3,
     "sight": 500,
-    "amount" : 20
+    "amount" : 10
   },
   "dragon": {
     "xp" : 400,
@@ -39,39 +39,52 @@
   "archer": {
     "hp": 50,
     "speed": 1,
-    "attack": -4,
-    "defense": -2
+    "defenseOff": -3,
+    "attack": [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    "defense": [0, 0, 0, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1]
   },
   "mage": {
     "hp": 0,
-    "speed": -1,
-    "attack": -4,
-    "defense": -3
+    "speed": 0,
+    "defenseOff": -3,
+    "attack": [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    "defense": [0, 0, 0, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1]
   },
   "knight": {
     "hp": 100,
-    "speed": 0,
-    "attack": 3,
-    "defense": 4
+    "speed": -1,
+    "attackOff": 3,
+    "defenseOff": 4,
+    "attack": [0, 0, 0, 1, 1.5, 1.5, 1.5, 2, 2, 2, 3, 5],
+    "defense": [0, 0, 0, 1, 1.5, 1.5, 1.5, 2, 2, 2, 3, 5]
+  },
+  "peasant": {
+    "speed": 5,
+    "attack" :  [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    "defense" : [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   },
   "fire": {
     "counter": 25,
     "speed": 15,
     "damage": 20,
     "range": 1500,
-    "radius": 75
+    "radius": 30
   },
   "arrow": {
     "counter": 50,
-    "speed": 15,
-    "damage": 50,
+    "speed": 25,
+    "damage": 20,
     "range": 1500,
-    "radius": 40
+    "radius": 20
+  },
+  "lightning": {
+    "times": 10,
+    "counter": 100,
+    "damage": 5,
+    "link": 200,
+    "stayCounter": 20
   },
   "playerHp": [100, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
-  "playerSpeed": [5, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2],
-  "playerAttack" :  [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  "playerDefense" : [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   "xpForLevel": [10, 20, 50, 100, 200, 500, 1000, 2000, 4000, 10000],
   "xpForKill": [5, 10, 20, 50, 100, 200, 400, 1000, 2000, 4000],
   "counters" : {
@@ -79,10 +92,17 @@
     "attack": 20,
     "achievement": 100
   },
-  "AIUsers" : 20,
+  "AIUsers" : 50,
   "fakeFactor" : 5,
   "gameWidth": 5000,
   "gameHeight": 5000,
+  "names":
+  ["Obama","Team?","CIA","Kim Jong-Un","NotReallyABot","IsThisAgar?","Zod",
+  "Tyler \"H-12\" Camp", "WHOM", "Br9don", "Joby Wan Kenobi", "Trung Tran", "Fire Bird",
+  "nameless cell", "help me", "NoticeMeSenpai","ur mom", "hi", ":)",
+  "KingOfTheNorth", "c:::{====>", "no name", "DAB"],
+
+
   "adminPass": "DEFAULT",
   "logChat": 0,
   "networkUpdateFactor": 40,
