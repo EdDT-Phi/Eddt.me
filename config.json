@@ -52,7 +52,7 @@
   },
   "knight": {
     "hp": 100,
-    "speed": -1,
+    "speed": 2,
     "attackOff": 3,
     "defenseOff": 4,
     "attack": [0, 0, 0, 1, 1.5, 1.5, 1.5, 2, 2, 2, 3, 5],

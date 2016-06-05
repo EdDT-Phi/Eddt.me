@@ -271,6 +271,7 @@ io.on('connection', function (socket)
 				currentPlayer.x =  position.x;
 				currentPlayer.y =  position.y;
 				currentPlayer.radius = radius;
+				currentPlayer.skill = undefined;
 				currentPlayer.kills = {
 					mouse: 0,
 					spider: 0,
@@ -476,7 +477,7 @@ function killFunc(creature, player)
 	if(player && (player.type === 'fake' || player.type === 'player'))
 	{
 
-		let offset = (player.type==='fake'? 5 : 1);
+		let offset = (player.type==='fake'? 2 : 1);
 
 		if(creature.type === 'player' || creature.type === 'fake')
 			player.xp += conf.xpForKill[creature.level] * offset;
@@ -498,23 +499,34 @@ function killFunc(creature, player)
 			else
 				player.kills[creature.type]++;
 
-			let kills = player.kills[creature.type];
 
+
+			let kills = player.kills[creature.type];
 			if(kills === 1)
+			{
 				sockets[player.id].emit('achievement', {txt: 'Killed your first '+ creature.type  +'!', counter: conf.counters.achievement});
+			}
 			else if (kills === 10 || kills === 50 || kills === 100)
-				sockets[player.id].emit('achievement', {txt: 'Killed '+kills+' '+ plural +'!', counter: conf.counters.achievement});
+			{
+				var xpGained;
+				if(conf[creature.type])
+				{
+					xpGained = kills * conf[creature.type].xp;
+					player.xp += xpGained;
+				}
+				sockets[player.id].emit('achievement', {txt: 'Killed '+kills+' '+ plural +'! +' + xpGained + ' xp', counter: conf.counters.achievement});
+			}
 		}
 	}
 }
 
-function distanceCheck(creature, others, distance, type)
+function distanceCheck(creature, others, distance, type, id2)
 {
 	var minTarget = {}, minDist = distance;
 	for (var i = 0; i < others.length; i++)
 	{
 		var dist = util.getDistance(others[i], creature);
-		if(creature.id !== others[i].id  && !others[i].dead && dist < minDist)
+		if(creature.id !== others[i].id && id2 !== others[i].id && !others[i].dead && dist < minDist)
 		{
 			minDist = dist;
 			minTarget =  {target: others[i], type: type, dist: dist};
@@ -570,23 +582,65 @@ function tickPlayer(currentPlayer)
 			else if(currentPlayer.class === 'archer')
 			{
 				type = 'arrow';
+				if(currentPlayer.skill === 'arrow')
+				{
+					radius = 1.2;
+					damage = 1.5;
+				}
 			}
 
 			if(type)
 			{
+				var direction;
+				if (currentPlayer.type === 'fake')
+					direction = util.getDirection(currentPlayer, currentPlayer.target);
+				else
+					direction = util.getDirection({x:0, y:0}, currentPlayer.target);
+
+
 				currentPlayer.attackCounter = conf[type].counter;
 				projectiles.push(
 				{
 					x: currentPlayer.x,
 					y: currentPlayer.y,
 					user: currentPlayer,
-					direction: util.getDirection({x:0, y:0}, currentPlayer.target),
+					direction: direction,
 					type: type,
 					speed: conf[type].speed,
 					range: conf[type].range,
 					radius: conf[type].radius * radius,
 					damage: (conf[type].damage + currentPlayer.attack) * damage,
 				});
+
+
+				if(currentPlayer.skill === 'arrow_three')
+				{
+					currentPlayer.attackCounter *= 2;
+					projectiles.push(
+					{
+						x: currentPlayer.x,
+						y: currentPlayer.y,
+						user: currentPlayer,
+						direction: direction + 0.2,
+						type: type,
+						speed: conf[type].speed,
+						range: conf[type].range,
+						radius: conf[type].radius * radius,
+						damage: (conf[type].damage + currentPlayer.attack) * damage,
+					});
+					projectiles.push(
+					{
+						x: currentPlayer.x,
+						y: currentPlayer.y,
+						user: currentPlayer,
+						direction: direction - 0.2,
+						type: type,
+						speed: conf[type].speed,
+						range: conf[type].range,
+						radius: conf[type].radius * radius,
+						damage: (conf[type].damage + currentPlayer.attack) * damage,
+					});
+				}
 			}
 			else
 			{
@@ -612,7 +666,7 @@ function lightning(currentPlayer)
 	var nextTarget = currentPlayer;
 	while(times-- >= 0)
 	{
-		var target = distanceCheck({x: nextTarget.x, y: nextTarget.y, radius:nextTarget.radius, id:currentPlayer.id}, users, conf.lightning.link);
+		var target = distanceCheck(nextTarget, users, conf.lightning.link, '', currentPlayer.id);
 		if(!target.target) target = distanceCheck(nextTarget, [dragon], conf.lightning.link);
 		if(!target.target) target = distanceCheck(nextTarget, zombies, conf.lightning.link);
 		if(!target.target) target = distanceCheck(nextTarget, spiders, conf.lightning.link);
@@ -671,6 +725,10 @@ function checkXp(currentPlayer)
 				if(currentPlayer.type === 'fake')
 				{
 					// TODO
+					if(currentPlayer.class === 'mage')
+						currentPlayer.skill = ['fire', 'lightning'][Math.floor(Math.random() * 2)];
+					else if (currentPlayer.class === 'archer')
+						currentPlayer.skill = ['arrow', 'arrow_three'][Math.floor(Math.random() * 2)];
 					// var classes = ['mage', 'archer', 'knight'];
 					// currentPlayer.class = classes[Math.floor(Math.random() * 3)];
 				}
@@ -678,6 +736,8 @@ function checkXp(currentPlayer)
 				{
 					if(currentPlayer.class === 'mage')
 						sockets[currentPlayer.id].emit('LVL5', 'fire', 'lightning');
+					else if (currentPlayer.class === 'archer')
+						sockets[currentPlayer.id].emit('LVL5', 'arrow', 'arrow_three');
 				}
 			}
 
@@ -1048,8 +1108,8 @@ function sendUpdates() {
 		if(u.type != 'fake')
 		{
 			// center the view if x/y is undefined, this will happen for spectators
-			u.x = u.x || conf.gameWidth / 2;
-			u.y = u.y || conf.gameHeight / 2;
+			// u.x = u.x || conf.gameWidth / 2;
+			// u.y = u.y || conf.gameHeight / 2;
 
 
 

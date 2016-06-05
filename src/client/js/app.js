@@ -160,9 +160,10 @@ function startGame(type) {
 
 // Checks if the nick chosen contains valid alphanumeric characters (and underscores).
 function validNick() {
-	var regex = /^\w*$/;
-	debug('Regex Test', regex.exec(playerNameInput.value));
-	return regex.exec(playerNameInput.value) !== null;
+	return true;
+	// var regex = /^\w*$/;
+	// debug('Regex Test', regex.exec(playerNameInput.value));
+	// return regex.exec(playerNameInput.value) !== null;
 }
 
 window.onload = function() {
@@ -443,6 +444,8 @@ function hideAll()
 	document.getElementById('mage').style.visibility = 'hidden';
 	document.getElementById('fire').style.visibility = 'hidden';
 	document.getElementById('lightning').style.visibility = 'hidden';
+	document.getElementById('arrow').style.visibility = 'hidden';
+	document.getElementById('arrow_three').style.visibility = 'hidden';
 }
 
 $('#archer' ).click(function() {
@@ -471,6 +474,18 @@ $('#lightning' ).click(function() {
 
 $('#fire' ).click(function() {
 		socket.emit('skill', 'fire');
+		hideAll();
+		c.focus();
+});
+
+$('#arrrow' ).click(function() {
+		socket.emit('skill', 'arrrow');
+		hideAll();
+		c.focus();
+});
+
+$('#arrow_three' ).click(function() {
+		socket.emit('skill', 'arrow_three');
 		hideAll();
 		c.focus();
 });

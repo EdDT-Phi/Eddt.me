@@ -66,6 +66,24 @@ div {
     padding: 5px;
 }
 
+#arrow {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
+#arrow_three {
+    position: absolute;
+    bottom: 10px;
+    right: 110px;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+}
+
 #status {
     position: absolute;
     padding: 10px;

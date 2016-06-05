@@ -5,6 +5,8 @@
 var conf = require('../../../config.json');
 
 exports.validNick = function(nickname) {
+	if(nickname)
+		return true;
 	var regex = /^\w*$/;
 	return regex.exec(nickname) !== null;
 };
