@@ -111,6 +111,6 @@
 
   "adminPass": "DEFAULT",
   "logChat": 0,
-  "networkUpdateFactor": 40,
+  "gameFPS": 25,
   "maxHeartbeatInterval": 60000
 }
