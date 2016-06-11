@@ -23,8 +23,13 @@ var mobile = false;
 
 var mouse = {
   image: new Image(),
-  size: 40
+  size: 30
 }; mouse.image.src = 'img/mouse.png';
+
+var egg = {
+  image: new Image(),
+  size: 100
+}; egg.image.src = 'img/dragon_egg.png';
 
 var skull = {
 	image : new Image()
@@ -32,8 +37,23 @@ var skull = {
 
 var grass = {
   image: new Image(),
-  size: 50
+  size: 35
 }; grass.image.src = 'img/grass.png';
+
+var spider = {
+  image: new Image(),
+  size: 80
+}; spider.image.src = 'img/spider.png';
+
+var zombie = {
+  image: new Image(),
+  size: 100
+}; zombie.image.src = 'img/zombie.png';
+
+var dragon = {
+  image: new Image(),
+  size: 300
+}; dragon.image.src = 'img/dragon.png';
 
 
 var projectile_types = {
@@ -103,25 +123,6 @@ classes.mage.image_left.src = 'img/mage_left.png';
 // classes.mage.attack_image_left.src = 'img/mage_attack_left.png';
 classes.mage.attack_image_left.src = 'img/mage_left.png';
 
-var tree = {
-  image: new Image(),
-  size: 250
-}; tree.image.src = 'img/tree.jpg';
-
-var spider = {
-  image: new Image(),
-  size: 100
-}; spider.image.src = 'img/spider.png';
-
-var zombie = {
-  image: new Image(),
-  size: 100
-}; zombie.image.src = 'img/zombie.png';
-
-var dragon = {
-  image: new Image(),
-  size: 300
-}; dragon.image.src = 'img/dragon.png';
 
 
 
@@ -844,30 +845,27 @@ function setupSocket(socket)
 	});
 }
 
-function drawCircle(centerX, centerY, radius, sides)
+function drawDragon(creature)
 {
-	var theta = 0;
-	var x = 0;
-	var y = 0;
-
-	graph.beginPath();
-
-	for (var i = 0; i < sides; i++)
+	if(creature.state === 'egg')
 	{
-		theta = (i / sides) * 2 * Math.PI;
-		x = centerX + radius * Math.sin(theta);
-		y = centerY + radius * Math.cos(theta);
-		graph.lineTo(x, y);
+		drawCreature(creature, egg);
 	}
-
-	graph.closePath();
-	graph.stroke();
-	graph.fill();
+	else if(creature.baby)
+	{
+		drawCreature(creature, dragon, true);
+	}
+	else
+	{
+		drawCreature(creature, dragon, true);
+	}
 }
 
 function drawCreature(creature, image, debug)
 {
 	graph.save();
+
+	// var sizeOff = 1 || ratio;
 
 	graph.translate(creature.x - player.x + screenWidth / 2, creature.y - player.y + screenHeight / 2); // change origin
 
@@ -883,19 +881,19 @@ function drawCreature(creature, image, debug)
 		if(debug)
 		{
 			graph.beginPath();
-			graph.arc(0, 0, 50, 0, 2 * Math.PI);
+			graph.arc(0, 0, creature.radius, 0, 2 * Math.PI);
 			graph.stroke();
 		}
 
 		graph.fillStyle='red';
-		graph.fillRect(-image.size/2, image.size/2 , image.size, 5);
+		graph.fillRect(-creature.radius, creature.radius , creature.radius * 2, 5);
 		graph.fillStyle='green';
-		graph.fillRect(-image.size/2, image.size/2 , creature.hp / creature.maxHP * image.size, 5);
+		graph.fillRect(-creature.radius , creature.radius , creature.hp / creature.maxHP * creature.radius * 2, 5);
 
 		graph.rotate(creature.direction);
 	}
 
-	graph.drawImage(useImage, -image.size/2 , -image.size/2 ,image.size, image.size);
+	graph.drawImage(useImage, -creature.radius, -creature.radius, creature.radius*2, creature.radius*2);
 	graph.restore();
 }
 
@@ -922,31 +920,6 @@ function drawProjectile(projectile, debug)
 		graph.drawImage(projectile_types[projectile.type].image, -projectile.radius, -projectile.radius,projectile.radius*2, projectile.radius*2);
 	graph.restore();
 }
-
-function drawTree(tree)
-{
-	// graph.strokeStyle = spider.stroke;
-	// graph.fillStyle = spider.fill;
-	// graph.lineWidth = spider.strokeWidth;
-	// drawCircle(spider.x - player.x + screenWidth / 2, spider.y - player.y + screenHeight / 2, spider.radius, spiderSides);
-
-	graph.drawImage(tree.image, tree.x - player.x + screenWidth / 2 , tree.y - player.y + screenHeight / 2 , tree.size, tree.size);
-
-}
-
-// function drawSpider(spiderToDraw)
-// {
-// 	graph.beginPath();
-// 	graph.arc(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2, spiderToDraw.radius, 0, 2 * Math.PI);
-// 	graph.stroke();
-
-// 	graph.save();
-// 	graph.translate(spiderToDraw.x - player.x + screenWidth / 2, spiderToDraw.y - player.y + screenHeight / 2); // change origin
-// 	graph.rotate(spiderToDraw.direction);
-// 	graph.drawImage(spider.image, -spider.size/2 , -spider.size/2 ,spider.size, spider.size);
-// 	graph.restore();
-// }
-
 
 function drawPlayers(users, debug)
 {
@@ -985,7 +958,7 @@ function drawPlayers(users, debug)
 		graph.drawImage(useImage, users[user].x - player.x + screenWidth / 2 - (users[user].radius), users[user].y - player.y + screenHeight / 2 - (users[user].radius)  , users[user].radius * 2, users[user].radius * 2);
 
 		graph.fillStyle='black';
-		graph.fillRect(0, screenHeight - 10, screenWidth, 10);
+		// graph.fillRect(0, screenHeight - 10, screenWidth, 10);
 		graph.font = '15px Arial';
 		var text = users[user].name + ' (' + users[user].level + ')';
 		graph.fillText(text, users[user].x - player.x + screenWidth / 2 - text.length * 3 ,  users[user].y - player.y + screenHeight / 2 - users[user].radius - 5);
@@ -1075,8 +1048,8 @@ function drawborder() {
 
 function drawAchievements()
 {
-	graph.fillStyle='black';
-	graph.font = '30px Arial';
+	graph.fillStyle='yellow';
+	graph.font = '20px Arial';
 	for (var i = 0; i < achievements.length; i++)
 	{
 		if(achievements[i].counter-- < 0)
@@ -1086,7 +1059,7 @@ function drawAchievements()
 		}
 		else
 		{
-			graph.fillText(achievements[i].txt, (screenWidth / 2) - achievements[i].txt.length , (i + 1) * 25);
+			graph.fillText(achievements[i].txt, screenWidth / 2 - achievements[i].txt.length * 3, screenHeight / 2 - 75 - (30 * i));
 		}
 	}
 }
@@ -1146,10 +1119,12 @@ function gameLoop() {
 			graph.fillRect(0, 0, screenWidth, screenHeight);
 
 			drawGrass();
-			mice.forEach(function(creature){drawCreature(creature, mouse);});
-			spiders.forEach(function(creature){drawCreature(creature, spider);});
-			zombies.forEach(function(creature){drawCreature(creature, zombie);});
-			dragons.forEach(function(creature){drawCreature(creature, dragon);});
+			mice.forEach(function(creature){drawCreature(creature, mouse, true);});
+			spiders.forEach(function(creature){drawCreature(creature, spider, true);});
+			zombies.forEach(function(creature){drawCreature(creature, zombie, true);});
+
+			dragons.forEach(function(creature){drawDragon(creature);});
+
 			projectiles.forEach(drawProjectile);
 
 			drawAchievements();
