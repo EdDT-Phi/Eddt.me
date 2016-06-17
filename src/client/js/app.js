@@ -853,11 +853,11 @@ function drawDragon(creature)
 	}
 	else if(creature.baby)
 	{
-		drawCreature(creature, dragon, true);
+		drawCreature(creature, dragon, false);
 	}
 	else
 	{
-		drawCreature(creature, dragon, true);
+		drawCreature(creature, dragon, false);
 	}
 }
 
@@ -1119,9 +1119,9 @@ function gameLoop() {
 			graph.fillRect(0, 0, screenWidth, screenHeight);
 
 			drawGrass();
-			mice.forEach(function(creature){drawCreature(creature, mouse, true);});
-			spiders.forEach(function(creature){drawCreature(creature, spider, true);});
-			zombies.forEach(function(creature){drawCreature(creature, zombie, true);});
+			mice.forEach(function(creature){drawCreature(creature, mouse, false);});
+			spiders.forEach(function(creature){drawCreature(creature, spider, false);});
+			zombies.forEach(function(creature){drawCreature(creature, zombie, false);});
 
 			dragons.forEach(function(creature){drawDragon(creature);});
 
