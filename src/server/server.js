@@ -166,7 +166,7 @@ function movePlayer(player)
 
 	if(!player.moveTarget) return;
 
-	if((player.moveTarget.x !== 0 || player.moveTarget.y !== 0) && util.getDistance(player, player.moveTarget, false) > 50)
+	if((player.moveTarget.x !== 0 || player.moveTarget.y !== 0) && util.getDistance(player, player.moveTarget, false) > 30)
 	{
 		let deg;
 		if (player.type === 'player')

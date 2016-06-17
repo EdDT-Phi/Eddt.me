@@ -58,11 +58,11 @@
   },
   "knight": {
     "hp": 100,
-    "speed": 2,
+    "speed": 2.5,
     "attackOff": 3,
     "defenseOff": 4,
-    "attack": [0, 0, 0, 1, 1.5, 1.5, 1.5, 2, 2, 2, 3, 5],
-    "defense": [0, 0, 0, 1, 1.5, 1.5, 1.5, 2, 2, 2, 3, 5]
+    "attack": [0, 0, 0, 1, 2, 2, 2.5, 2.5, 3, 3, 4, 5],
+    "defense": [0, 0, 0, 1, 2, 2, 2.5, 2.5, 3, 3, 4, 5]
   },
   "peasant": {
     "speed": 5,
@@ -106,8 +106,8 @@
   "names":
   ["Obama","Team?","CIA","Kim Jong-Un","NotReallyABot","IsThisAgar?","Zod",
   "Tyler \"H-12\" Camp", "WHOM", "Br9don", "Joby Wan Kenobi", "Trung Tran", "Fire Bird",
-  "nameless cell", "help me", "NoticeMeSenpai","ur mom", "hi", ":)",
-  "KingOfTheNorth", "c:::{====>", "no name", "DAB"],
+  "nameless cell", "help me", "NoticeMeSenpai", "hi",
+  "KingOfTheNorth", "c:::{====>", "no name", "SummerOfBooz", "Stark"],
 
   "adminPass": "DEFAULT",
   "logChat": 0,
