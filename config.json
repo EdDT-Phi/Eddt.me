@@ -2,29 +2,26 @@
   "port": 3001,
   "mouse": {
     "xp": 1,
-    "hp": 40,
+    "hp": 30,
     "speed": 1,
     "attack": 2,
-    "defense": 2,
     "amount": 200,
     "radius": 15
   },
   "spider": {
     "xp": 20,
-    "hp": 100,
+    "hp": 50,
     "speed": 3.5,
-    "attack": 6,
-    "defense": 6,
+    "attack": 3,
     "sight": 300,
     "amount": 10,
     "radius": 40
   },
   "zombie": {
     "xp": 15,
-    "hp": 150,
-    "speed": 4,
+    "hp": 250,
+    "speed": 4.5,
     "attack": 10,
-    "defense": 3,
     "sight": 500,
     "amount": 10,
     "radius": 45
@@ -35,7 +32,6 @@
     "sight": 300,
     "amount": 1,
     "attack": 15,
-    "defense": 20,
     "idleSpeed": 3.5,
     "attackSpeed": 6.5,
     "eggCounter": 500,
@@ -45,41 +41,34 @@
   "archer": {
     "hp": 50,
     "speed": 1,
-    "defenseOff": -3,
-    "attack": [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    "defense": [0, 0, 0, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1]
+    "attack": [0, 0, 0, 2, 2, 2, 3, 3, 3, 4, 5, 6]
   },
   "mage": {
     "hp": 0,
     "speed": 0,
-    "defenseOff": -3,
-    "attack": [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5],
-    "defense": [0, 0, 0, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1]
+    "attack": [0, 0, 0, 2, 2, 2, 3, 3, 3, 4, 5, 6]
   },
   "knight": {
     "hp": 100,
     "speed": 2.5,
     "attackOff": 3,
-    "defenseOff": 4,
-    "attack": [0, 0, 0, 1, 2, 2, 2.5, 2.5, 3, 3, 4, 5],
-    "defense": [0, 0, 0, 1, 2, 2, 2.5, 2.5, 3, 3, 4, 5]
+    "attack": [0, 0, 0, 1, 2, 2, 2.5, 2.5, 3, 3, 4, 5]
   },
   "peasant": {
     "speed": 5,
-    "attack":  [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    "defense": [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    "attack":  [3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   },
   "fire": {
     "counter": 25,
     "speed": 15,
-    "damage": 20,
+    "damage": 10,
     "range": 1500,
     "radius": 30
   },
   "arrow": {
     "counter": 50,
     "speed": 25,
-    "damage": 20,
+    "damage": 10,
     "range": 1500,
     "radius": 20
   },
@@ -99,7 +88,7 @@
     "achievement": 100
   },
   "AIUsers": 50,
-  "xpFactor": 4,
+  "xpFactor": 5,
   "healthFactor": 2,
   "gameWidth": 5000,
   "gameHeight": 5000,

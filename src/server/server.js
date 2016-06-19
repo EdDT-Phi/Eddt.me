@@ -29,7 +29,6 @@ let dragon = {
 	hp: conf.dragon.hp,
 	maxHP: conf.dragon.hp,
 	attack: conf.dragon.attack,
-	defense: conf.dragon.defense,
 	direction: Math.random() * 2 * Math.PI,
 	attackCounter: -1};
 
@@ -44,6 +43,8 @@ let center = {
 	radius: 5
 };
 
+let realPlayers = 0;
+
 
 let leaderboard = [];
 let leaderboardChanged = false;
@@ -51,18 +52,14 @@ let leaderboardChanged = false;
 app.use(express.static(__dirname + '/../client'));
 
 function addMice() {
-	// let radius = 30; // util.levelToRadius(conf.mouse.hp);
 	while (mice.length < conf.mouse.amount) {
-		// let position = conf.foodUniformDisposition ? util.uniformPosition(mice, radius): util.randomPosition(radius);
 		mice.push({
-			// Make IDs unique.
 			id: ((new Date()).getTime() + '' + mice.length) >>> 0,
 			type: 'mouse',
 			hp: conf.mouse.hp,
 			maxHP: conf.mouse.hp,
 			radius: conf.mouse.radius,
 			attack: conf.mouse.attack,
-			defense: conf.mouse.defense,
 			y: Math.random() * conf.gameWidth,
 			x: Math.random() * conf.gameHeight,
 			direction: Math.random() * 2 * Math.PI
@@ -71,16 +68,16 @@ function addMice() {
 }
 
 function addSpiders() {
-	let radius = 50; //util.levelToRadius(mass);
 	while (spiders.length < conf.spider.amount) {
+		let spiderType = util.randomInRange(2,5);
+
 		spiders.push({
 			id: ((new Date()).getTime() + '' + spiders.length) >>> 0,
 			type: 'spider',
-			hp: conf.spider.hp,
-			maxHP: conf.spider.hp,
-			radius: conf.spider.radius,
-			attack: conf.spider.attack,
-			defense: conf.spider.defense,
+			hp: conf.spider.hp * spiderType,
+			maxHP: conf.spider.hp * spiderType,
+			radius: 10 * spiderType + 10,
+			attack: conf.spider.attack * spiderType,
 			y: Math.random() * conf.gameWidth,
 			x: Math.random() * conf.gameHeight,
 			direction: Math.random() * 2 * Math.PI,
@@ -90,8 +87,7 @@ function addSpiders() {
 }
 
 function addZombies() {
-	let radius = 50; //util.levelToRadius(mass);
-	while (zombies.length < conf.zombie.amount) {
+	while (zombies.length < Math.min(conf.zombie.amount, realPlayers + 1)) {
 		zombies.push({
 			id: ((new Date()).getTime() + '' + zombies.length) >>> 0,
 			type: 'zombie',
@@ -100,7 +96,6 @@ function addZombies() {
 			maxHP: conf.zombie.hp,
 			radius: conf.zombie.radius,
 			attack: conf.zombie.attack,
-			defense: conf.zombie.defense,
 			y: Math.random() * conf.gameWidth,
 			x: Math.random() * conf.gameHeight,
 			direction: Math.random() * 2 * Math.PI,
@@ -131,7 +126,6 @@ function addPlayers()
 			maxHP: conf.playerHp[0],
 			speed: conf.peasant.speed,
 			attack: conf.peasant.attack[0],
-			defense: conf.peasant.defense[0],
 			attackCounter: -1,
 			playerKills: 0,
 			kills : {
@@ -203,7 +197,7 @@ function addCreatures()
 
 io.on('connection', function (socket)
 {
-	console.log('A user connected!', socket.handshake.query.type);
+	console.log('A user connected! ', socket.handshake.query.type, ' ', ++realPlayers);
 
 	let type = socket.handshake.query.type;
 
@@ -256,7 +250,6 @@ io.on('connection', function (socket)
 				currentPlayer.hp = conf.playerHp[0];
 				currentPlayer.maxHP = conf.playerHp[0];
 				currentPlayer.attack = conf.peasant.attack[0];
-				currentPlayer.defense = conf.peasant.defense[0];
 				currentPlayer.speed = conf.peasant.speed; // conf.playerSpeed[0];
 				currentPlayer.x =  position.x;
 				currentPlayer.y =  position.y;
@@ -308,6 +301,7 @@ io.on('connection', function (socket)
 		  console.log('[INFO] User ' + currentPlayer.name + ' disconnected!');
 
 		  socket.broadcast.emit('playerDisconnect', { name: currentPlayer.name });
+		  realPlayers --;
 	 });
 
 	 socket.on('playerChat', function(data)
@@ -392,13 +386,16 @@ io.on('connection', function (socket)
 		currentPlayer.hp += conf[_class].hp;
 		currentPlayer.maxHP += conf[_class].hp;
 		currentPlayer.speed += conf[_class].speed;
-		if(conf[_class].attakOff)
+		if(conf[_class].attackOff)
+		{
 			currentPlayer.attack += conf[_class].attackOff;
+			console.log('upgrade');
+		}
 		else
+		{
 			currentPlayer.attack = 0;
-
-		if(conf[_class].defenseOff)
-			currentPlayer.defense += conf[_class].defenseOff;
+			console.log('no upgrade');
+		}
 	});
 
 	socket.on('skill', function(skill)
@@ -414,18 +411,15 @@ io.on('connection', function (socket)
 	// Heartbeat function, update everytime.
 	socket.on('0', function(target,  moveTarget) {
 		currentPlayer.lastHeartbeat = new Date().getTime();
-		// console.log(target);
-		// if (moveTarget.x !== currentPlayer.x || moveTarget.y !== currentPlayer.y) {
 		currentPlayer.moveTarget = moveTarget;
 		currentPlayer.target = target;
-		// }
 	});
 });
 
 function attackFunc(p1, p2)
 {
 	p1.attackCounter = conf.counters.attack;
-	p2.hp -= p1.attack * Math.sqrt(p1.attack) / p2.defense * 6;
+	p2.hp -= p1.attack * Math.sqrt(p1.attack) * 2;
 
 	if(p2.hp <= 0)
 	{
@@ -450,7 +444,7 @@ function retaliation(p1, p2)
 		}
 		else if (p2.type === 'fake')
 		{
-			if(p1.type === 'zombie' || p1.type === 'fake' ||p1.type === 'dragon' || p1.type === 'player' && p1.defense > p2.attack)
+			if(p1.type === 'zombie' || p1.type === 'fake' ||p1.type === 'dragon' || p1.type === 'player' && p1.attack > p2.attack)
 				return;
 			else
 			{
@@ -648,11 +642,11 @@ function tickPlayer(currentPlayer)
 				let target = {};
 				if(currentPlayer.type === 'fake' || currentPlayer.attacking)
 				{
-					target = distanceCheck(currentPlayer, users, 0, 'player');
+					if(!target.target) target = distanceCheck(currentPlayer, mice, 0, 'mouse');
+					if(!target.target) target = distanceCheck(currentPlayer, users, 0, 'player');
 					if(dragon.state !== 'egg' && !target.target) target = distanceCheck(currentPlayer, [dragon], 0, 'dragon');
 					if(!target.target) target = distanceCheck(currentPlayer, zombies, 0, 'zombie');
 					if(!target.target) target = distanceCheck(currentPlayer, spiders, 0, 'spider');
-					if(!target.target) target = distanceCheck(currentPlayer, mice, 0, 'mouse');
 				}
 
 				if(target.target && currentPlayer.attackCounter < 0 && attackFunc(currentPlayer, target.target) === 'dead')
@@ -730,13 +724,10 @@ function checkXp(currentPlayer)
 			{
 				if(currentPlayer.type === 'fake')
 				{
-					// TODO
 					if(currentPlayer.class === 'mage')
 						currentPlayer.skill = ['fire', 'lightning'][Math.floor(Math.random() * 2)];
 					else if (currentPlayer.class === 'archer')
 						currentPlayer.skill = ['arrow', 'arrow_three'][Math.floor(Math.random() * 2)];
-					// let classes = ['mage', 'archer', 'knight'];
-					// currentPlayer.class = classes[Math.floor(Math.random() * 3)];
 				}
 				else
 				{
@@ -749,9 +740,7 @@ function checkXp(currentPlayer)
 
 			currentPlayer.hp += conf.playerHp[currentPlayer.level];
 			currentPlayer.maxHP += conf.playerHp[currentPlayer.level];
-			// currentPlayer.speed += conf.playerSpeed[currentPlayer.level];
 			currentPlayer.attack += conf[currentPlayer.class].attack[currentPlayer.level];
-			currentPlayer.defense += conf[currentPlayer.class].defense[currentPlayer.level];
 			currentPlayer.radius = util.levelToRadius(currentPlayer.level);
 		}
 }
@@ -809,6 +798,7 @@ function tickSpider(spider)
 				return util.getDistance(spider, obj1) - util.getDistance(spider, obj2);
 			});
 			spider.target = distUsers[util.randomInRange(0, 5)];
+			if(spider.target.type === 'spectator') spider.target = undefined;
 		}
 	}
 
@@ -921,7 +911,6 @@ function tickDragon()
 			dragon.maxHP = conf.dragon.hp / 2;
 			dragon.radius = conf.dragon.radius / 2;
 			dragon.attack = conf.dragon.attack / 2;
-			dragon.defense = conf.dragon.attack / 2;
 			dragon.babyCounter = conf.dragon.babyCounter;
 		}
 		return;
@@ -936,7 +925,6 @@ function tickDragon()
 			dragon.hp += conf.dragon.hp / 2;
 			dragon.radius = conf.dragon.radius;
 			dragon.attack = conf.dragon.attack;
-			dragon.defense = conf.dragon.defense;
 		}
 	}
 
