@@ -22,36 +22,36 @@ var mobile = false;
 var mouse = {
   image: new Image(),
   size: 30
-}; mouse.image.src = 'imgs/mouse.png';
+}; mouse.image.src = 'game/imgs/mouse.png';
 
 var egg = {
   image: new Image(),
   size: 100
-}; egg.image.src = 'imgs/dragon_egg.png';
+}; egg.image.src = 'game/imgs/dragon_egg.png';
 
 var skull = {
 	image : new Image()
-}; skull.image.src = 'imgs/skull.ico';
+}; skull.image.src = 'game/imgs/skull.ico';
 
 var grass = {
   image: new Image(),
   size: 35
-}; grass.image.src = 'imgs/grass.png';
+}; grass.image.src = 'game/imgs/grass.png';
 
 var spider = {
   image: new Image(),
   size: 80
-}; spider.image.src = 'imgs/spider.png';
+}; spider.image.src = 'game/imgs/spider.png';
 
 var zombie = {
   image: new Image(),
   size: 100
-}; zombie.image.src = 'imgs/zombie.png';
+}; zombie.image.src = 'game/imgs/zombie.png';
 
 var dragon = {
   image: new Image(),
   size: 300
-}; dragon.image.src = 'imgs/dragon.png';
+}; dragon.image.src = 'game/imgs/dragon.png';
 
 
 var projectile_types = {
@@ -66,9 +66,9 @@ var projectile_types = {
   	}
 };
 
-projectile_types.fire.image.src = 'imgs/fire.png';
-projectile_types.arrow.image.src = 'imgs/arrow.png';
-projectile_types.lightning.image.src = 'imgs/lightning.png';
+projectile_types.fire.image.src = 'game/imgs/fire.png';
+projectile_types.arrow.image.src = 'game/imgs/arrow.png';
+projectile_types.lightning.image.src = 'game/imgs/lightning.png';
 
 var classes = {
 	knight : {
@@ -97,29 +97,29 @@ var classes = {
 	},
 };
 
-classes.knight.image.src = 'imgs/knight.png';
-classes.knight.attack_image.src = 'imgs/knight_attack.png';
-classes.knight.image_left.src = 'imgs/knight_left.png';
-classes.knight.attack_image_left.src = 'imgs/knight_attack_left.png';
+classes.knight.image.src = 'game/imgs/knight.png';
+classes.knight.attack_image.src = 'game/imgs/knight_attack.png';
+classes.knight.image_left.src = 'game/imgs/knight_left.png';
+classes.knight.attack_image_left.src = 'game/imgs/knight_attack_left.png';
 
-classes.peasant.image.src = 'imgs/peasant.png';
-classes.peasant.attack_image.src = 'imgs/peasant_attack.png';
-classes.peasant.image_left.src = 'imgs/peasant_left.png';
-classes.peasant.attack_image_left.src = 'imgs/peasant_attack_left.png';
+classes.peasant.image.src = 'game/imgs/peasant.png';
+classes.peasant.attack_image.src = 'game/imgs/peasant_attack.png';
+classes.peasant.image_left.src = 'game/imgs/peasant_left.png';
+classes.peasant.attack_image_left.src = 'game/imgs/peasant_attack_left.png';
 
-classes.archer.image.src = 'imgs/archer.png';
-// classes.archer.attack_image.src = 'imgs/archer_attack.png';
-classes.archer.attack_image.src = 'imgs/archer.png';
-classes.archer.image_left.src = 'imgs/archer_left.png';
-// classes.archer.attack_image_left.src = 'imgs/archer_attack_left.png';
-classes.archer.attack_image_left.src = 'imgs/archer_left.png';
+classes.archer.image.src = 'game/imgs/archer.png';
+// classes.archer.attack_image.src = 'game/imgs/archer_attack.png';
+classes.archer.attack_image.src = 'game/imgs/archer.png';
+classes.archer.image_left.src = 'game/imgs/archer_left.png';
+// classes.archer.attack_image_left.src = 'game/imgs/archer_attack_left.png';
+classes.archer.attack_image_left.src = 'game/imgs/archer_left.png';
 
-classes.mage.image.src = 'imgs/mage.png';
-// classes.mage.attack_image.src = 'imgs/mage_attack.png';
-classes.mage.attack_image.src = 'imgs/mage.png';
-classes.mage.image_left.src = 'imgs/mage_left.png';
-// classes.mage.attack_image_left.src = 'imgs/mage_attack_left.png';
-classes.mage.attack_image_left.src = 'imgs/mage_left.png';
+classes.mage.image.src = 'game/imgs/mage.png';
+// classes.mage.attack_image.src = 'game/imgs/mage_attack.png';
+classes.mage.attack_image.src = 'game/imgs/mage.png';
+classes.mage.image_left.src = 'game/imgs/mage_left.png';
+// classes.mage.attack_image_left.src = 'game/imgs/mage_attack_left.png';
+classes.mage.attack_image_left.src = 'game/imgs/mage_left.png';
 
 
 
