@@ -1,30 +1,29 @@
 'use strict';
 
 module.exports = function(io) {
-'use strict';
-	
-	let express = require('express');
-	let app = express();
+
+	var express = require('express');
+	var app = express();
 	// let http = require('http').Server(app);
 	// let io = require('socket.io')(http);
 
 	var game_server = io.of('/game_io');
 
 	// Import game settings.
-	let conf = require('../config.json');
+	var conf = require('../config.json');
 
 	// Import utilities.
-	let util = require('./lib/util');
+	var util = require('./lib/util');
 
-	let args = {x: 0, y: 0, h: conf.gameHeight, w: conf.gameWidth};
+	var args = {x: 0, y: 0, h: conf.gameHeight, w: conf.gameWidth};
 	console.log(args);
 
 
-	let users = [];
-	let mice = [];
-	let spiders = [];
-	let zombies = [];
-	let dragon = {
+	var users = [];
+	var mice = [];
+	var spiders = [];
+	var zombies = [];
+	var dragon = {
 		type: 'dragon',
 		x: conf.gameWidth/2, //position.x,
 		y: conf.gameHeight/2, //position.y,
@@ -37,21 +36,21 @@ module.exports = function(io) {
 		attackCounter: -1};
 
 
-	let projectiles = [];
+	var projectiles = [];
 
-	let sockets = {};
+	var sockets = {};
 
-	let center = {
+	var center = {
 		x: conf.gameWidth/2,
 		y: conf.gameHeight/2,
 		radius: 5
 	};
 
-	let realPlayers = 0;
+	var realPlayers = 0;
 
 
-	let leaderboard = [];
-	let leaderboardChanged = false;
+	var leaderboard = [];
+	var leaderboardChanged = false;
 
 	app.use(express.static(__dirname + '/../client'));
 
@@ -73,7 +72,7 @@ module.exports = function(io) {
 
 	function addSpiders() {
 		while (spiders.length < conf.spider.amount) {
-			let spiderType = util.randomInRange(2,5);
+			var spiderType = util.randomInRange(2,5);
 
 			spiders.push({
 				id: ((new Date()).getTime() + '' + spiders.length) >>> 0,
@@ -110,11 +109,11 @@ module.exports = function(io) {
 
 	function addPlayers()
 	{
-		let radius = util.levelToRadius(0);
+		var radius = util.levelToRadius(0);
 		while(users.length < conf.AIUsers)
 		{
-			let position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
-			let name = util.randomName();
+			var position = conf.newPlayerInitialPosition == 'farthest' ? util.uniformPosition(users, radius) : util.randomPosition(radius);
+			var name = util.randomName();
 			users.push(
 			{
 				id: ((new Date()).getTime() + '' + users.length) >>> 0,
@@ -153,7 +152,7 @@ module.exports = function(io) {
 		{
 			if(!player.target || player.target.dead)
 			{
-				let distMice = mice.sort(function(obj1,obj2) {
+				var distMice = mice.sort(function(obj1,obj2) {
 					return util.getDistance(player, obj1) - util.getDistance(player, obj2);
 				});
 
@@ -166,7 +165,7 @@ module.exports = function(io) {
 
 		if((player.moveTarget.x !== 0 || player.moveTarget.y !== 0) && util.getDistance(player, player.moveTarget, false) > 30)
 		{
-			let deg;
+			var deg;
 			if (player.type === 'player')
 				deg = util.getDirection({x: 0, y: 0}, player.moveTarget);
 			else
@@ -203,9 +202,9 @@ module.exports = function(io) {
 	{
 		console.log('A user connected! ', socket.handshake.query.type, ' ', ++realPlayers);
 
-		let type = socket.handshake.query.type;
+		var type = socket.handshake.query.type;
 
-		let currentPlayer = {
+		var currentPlayer = {
 			type: type,
 			id: socket.id,
 			lastHeartbeat: new Date().getTime(),
@@ -244,9 +243,9 @@ module.exports = function(io) {
 
 				if(currentPlayer.type !== 'spectator')
 				{
-					let position = util.newPlayerPos(conf.gameWidth/2);
+					var position = util.newPlayerPos(conf.gameWidth/2);
 					console.log(position);
-					let radius = util.levelToRadius(0);
+					var radius = util.levelToRadius(0);
 					currentPlayer.dead = false;
 					currentPlayer.xp = 0;
 					currentPlayer.level = 0;
@@ -337,8 +336,8 @@ module.exports = function(io) {
 		 {
 			  if (currentPlayer.admin)
 			  {
-					let reason = '';
-					let worked = false;
+					var reason = '';
+					var worked = false;
 					for (let e = 0; e < users.length; e++)
 					{
 						 if (users[e].name === data[0] && !users[e].admin && !worked)
@@ -473,8 +472,8 @@ module.exports = function(io) {
 
 		if(player && (player.type === 'fake' || player.type === 'player'))
 		{
-			let xpOff = (player.type==='fake'? conf.xpFactor : 1);
-			let healthOff = (player.type==='fake'? conf.healthFactor : 1);
+			var xpOff = (player.type==='fake'? conf.xpFactor : 1);
+			var healthOff = (player.type==='fake'? conf.healthFactor : 1);
 
 			if(creature.type === 'player' || creature.type === 'fake')
 				player.xp += conf.xpForKill[creature.level] * xpOff;
@@ -482,7 +481,7 @@ module.exports = function(io) {
 				player.xp += conf[creature.type].xp * xpOff;
 
 
-			let plural = creature.type + 's';
+			var plural = creature.type + 's';
 			if(creature.type === 'mouse')
 			{
 				plural = 'mice';
@@ -498,14 +497,14 @@ module.exports = function(io) {
 
 
 
-				let kills = player.kills[creature.type];
+				var kills = player.kills[creature.type];
 				if(kills === 1)
 				{
 					sockets[player.id].emit('achievement', {txt: 'Killed your first '+ creature.type  +'!', counter: conf.counters.achievement});
 				}
 				else if (kills === 10 || kills === 50 || kills === 100)
 				{
-					let xpGained;
+					var xpGained;
 					if(conf[creature.type])
 					{
 						xpGained = kills * conf[creature.type].xp;
@@ -519,10 +518,10 @@ module.exports = function(io) {
 
 	function distanceCheck(creature, others, distance, type, id2)
 	{
-		let minTarget = {}, minDist = distance;
+		var minTarget = {}, minDist = distance;
 		for (let i = 0; i < others.length; i++)
 		{
-			let dist = util.getDistance(others[i], creature);
+			var dist = util.getDistance(others[i], creature);
 			if(creature.id !== others[i].id && id2 !== others[i].id && !others[i].dead && dist < minDist)
 			{
 				minDist = dist;
@@ -561,7 +560,7 @@ module.exports = function(io) {
 
 			if(currentPlayer.attackCounter < 0)
 			{
-				let type, radius = 1, damage = 1;
+				var type, radius = 1, damage = 1;
 				if(currentPlayer.class === 'mage')
 				{
 					type = 'fire';
@@ -589,7 +588,7 @@ module.exports = function(io) {
 
 				if(type)
 				{
-					let direction;
+					var direction;
 					if (currentPlayer.type === 'fake')
 						direction = util.getDirection(currentPlayer, currentPlayer.target);
 					else
@@ -643,7 +642,7 @@ module.exports = function(io) {
 				else
 				{
 
-					let target = {};
+					var target = {};
 					if(currentPlayer.type === 'fake' || currentPlayer.attacking)
 					{
 						if(!target.target) target = distanceCheck(currentPlayer, mice, 0, 'mouse');
@@ -666,11 +665,11 @@ module.exports = function(io) {
 
 	function lightning(currentPlayer)
 	{
-		let times = conf.lightning.times;
-		let nextTarget = currentPlayer;
+		var times = conf.lightning.times;
+		var nextTarget = currentPlayer;
 		while(times-- >= 0)
 		{
-			let target = distanceCheck(nextTarget, users, conf.lightning.link, '', currentPlayer.id);
+			var target = distanceCheck(nextTarget, users, conf.lightning.link, '', currentPlayer.id);
 			if(!target.target) target = distanceCheck(nextTarget, [dragon], conf.lightning.link);
 			if(!target.target) target = distanceCheck(nextTarget, zombies, conf.lightning.link);
 			if(!target.target) target = distanceCheck(nextTarget, spiders, conf.lightning.link);
@@ -716,7 +715,7 @@ module.exports = function(io) {
 				{
 					if(currentPlayer.type === 'fake')
 					{
-						let classes = ['mage', 'archer', 'knight'];
+						var classes = ['mage', 'archer', 'knight'];
 						currentPlayer.class = classes[Math.floor(Math.random() * 3)];
 					}
 					else
@@ -757,8 +756,8 @@ module.exports = function(io) {
 				return 'dead';
 			return;
 		}
-		let dx = -conf.mouse.speed * Math.sin(mouse.direction);
-		let dy = conf.mouse.speed * Math.cos(mouse.direction);
+		var dx = -conf.mouse.speed * Math.sin(mouse.direction);
+		var dy = conf.mouse.speed * Math.cos(mouse.direction);
 		if (mouse.x + dx > conf.gameWidth || mouse.y + dy > conf.gameHeight || mouse.x + dx < 0 || mouse.y + dy < 0)
 		{
 			mouse.direction += 1;
@@ -779,7 +778,7 @@ module.exports = function(io) {
 			return;
 		}
 
-		let minDist = conf.spider.sight, dist = 0;
+		var minDist = conf.spider.sight, dist = 0;
 
 		if(spider.attackCounter >= 0)
 		{
@@ -789,7 +788,7 @@ module.exports = function(io) {
 		if(!spider.target || util.getDistance(spider, spider.target) >= conf.spider.sight * 1.2 || spider.target.dead)
 		{
 
-			let distMice = mice.sort(function(obj1,obj2)
+			var distMice = mice.sort(function(obj1,obj2)
 			{
 				return util.getDistance(spider, obj1) - util.getDistance(spider, obj2);
 			});
@@ -797,7 +796,7 @@ module.exports = function(io) {
 
 			if(util.getDistance(spider, spider.target) > conf.spider.sight)
 			{
-				let distUsers = users.sort(function(obj1,obj2)
+				var distUsers = users.sort(function(obj1,obj2)
 				{
 					return util.getDistance(spider, obj1) - util.getDistance(spider, obj2);
 				});
@@ -865,7 +864,7 @@ module.exports = function(io) {
 			{
 				if(leaderboard.length > 0)
 				{
-					let id = leaderboard[util.zombieFunc(leaderboard.length)].id;
+					var id = leaderboard[util.zombieFunc(leaderboard.length)].id;
 					zombie.target = users[util.findUserById(users, id)];
 					// if(zombie.target)
 					// console.log("new target: ", zombie.target.name);
@@ -990,7 +989,7 @@ module.exports = function(io) {
 		if(dragon.target)
 		{
 			dragon.direction = util.getDirection(dragon, dragon.target);
-			let speed = (dragon.state === 'attack') ? conf.dragon.attackSpeed: conf.dragon.idleSpeed;
+			var speed = (dragon.state === 'attack') ? conf.dragon.attackSpeed: conf.dragon.idleSpeed;
 			if(dragon.babyCounter > 0) speed *= 0.5;
 			dragon.x -= speed * Math.sin(dragon.direction);
 			dragon.y += speed * Math.cos(dragon.direction);
@@ -1147,7 +1146,7 @@ module.exports = function(io) {
 				/*
 					uses filter to get rid of undefined values
 				*/
-				let visibleMice  = mice
+				var visibleMice  = mice
 					.map(function(mouse) {
 						if ( u.type === 'spectator' || mouse.x > u.x - u.screenWidth/2 - 20 &&
 							mouse.x < u.x + u.screenWidth/2 + 20 &&
@@ -1165,7 +1164,7 @@ module.exports = function(io) {
 						}
 					}).filter(function(f) { return f; });
 
-				let visibleSpiders  = spiders
+				var visibleSpiders  = spiders
 					.map(function(spider) {
 						if ( u.type === 'spectator' || spider.x > u.x - u.screenWidth/2 - spider.radius &&
 							spider.x < u.x + u.screenWidth/2 + spider.radius &&
@@ -1183,7 +1182,7 @@ module.exports = function(io) {
 						}
 					}).filter(function(f) { return f; });
 
-				let visibleZombies  = zombies
+				var visibleZombies  = zombies
 					.map(function(zombie) {
 						if ( u.type === 'spectator' || zombie.x > u.x - u.screenWidth/2 - zombie.radius &&
 							zombie.x < u.x + u.screenWidth/2 + zombie.radius &&
@@ -1203,7 +1202,7 @@ module.exports = function(io) {
 
 
 
-				let visiblePlayers  = users
+				var visiblePlayers  = users
 				.map(function(user) {
 					if ( u.type === 'spectator' || user.x+user.radius > u.x - u.screenWidth/2 - 20 &&
 						user.x-user.radius < u.x + u.screenWidth/2 + 20 &&
@@ -1228,7 +1227,7 @@ module.exports = function(io) {
 				})
 				.filter(function(f) {return f;});
 
-				let visibleProjectiles = projectiles
+				var visibleProjectiles = projectiles
 				.map(function(projectile)
 				{
 					if (u.type === 'spectator' || projectile.type === 'lightning' || projectile.x+projectile.radius > u.x - u.screenWidth/2 - 20 &&
