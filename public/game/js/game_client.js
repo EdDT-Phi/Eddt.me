@@ -192,11 +192,12 @@ window.onload = function() {
 	var instructions = document.getElementById('instructions');
 
 	settingsMenu.onclick = function () {
-		if (settings.style.maxHeight == '300px') {
-			settings.style.maxHeight = '0px';
-		} else {
-			settings.style.maxHeight = '300px';
-		}
+		window.location = "about";
+		// if (settings.style.maxHeight == '300px') {
+		// 	settings.style.maxHeight = '0px';
+		// } else {
+		// 	settings.style.maxHeight = '300px';
+		// }
 	};
 
 	playerNameInput.addEventListener('keypress', function (e) {
