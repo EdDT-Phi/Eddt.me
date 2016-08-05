@@ -4,8 +4,8 @@ module.exports = function(io) {
 
 	var express = require('express');
 	var app = express();
-	// let http = require('http').Server(app);
-	// let io = require('socket.io')(http);
+	// var http = require('http').Server(app);
+	// var io = require('socket.io')(http);
 
 	var game_server = io.of('/game_io');
 
@@ -309,8 +309,8 @@ module.exports = function(io) {
 
 		 socket.on('playerChat', function(data)
 		 {
-			  let _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
-			  let _message = data.message.replace(/(<([^>]+)>)/ig, '');
+			  var _sender = data.sender.replace(/(<([^>]+)>)/ig, '');
+			  var _message = data.message.replace(/(<([^>]+)>)/ig, '');
 			  if (conf.logChat === 1) {
 					console.log('[CHAT] [' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + '] ' + _sender + ': ' + _message);
 			  }
@@ -338,12 +338,12 @@ module.exports = function(io) {
 			  {
 					var reason = '';
 					var worked = false;
-					for (let e = 0; e < users.length; e++)
+					for (var e = 0; e < users.length; e++)
 					{
 						 if (users[e].name === data[0] && !users[e].admin && !worked)
 						 {
 							  if (data.length > 1) {
-									for (let f = 1; f < data.length; f++)
+									for (var f = 1; f < data.length; f++)
 									{
 										 if (f === data.length)
 											  reason = reason + data[f];
@@ -519,7 +519,7 @@ module.exports = function(io) {
 	function distanceCheck(creature, others, distance, type, id2)
 	{
 		var minTarget = {}, minDist = distance;
-		for (let i = 0; i < others.length; i++)
+		for (var i = 0; i < others.length; i++)
 		{
 			var dist = util.getDistance(others[i], creature);
 			if(creature.id !== others[i].id && id2 !== others[i].id && !others[i].dead && dist < minDist)
@@ -934,7 +934,7 @@ module.exports = function(io) {
 		if(dragon.attackCounter >= 0)
 			dragon.attackCounter--;
 
-		// let minDist = conf.dragon.sight;
+		// var minDist = conf.dragon.sight;
 		if(dragon.state === 'idle')
 		{
 
@@ -998,7 +998,7 @@ module.exports = function(io) {
 
 	function projectileHit(creatures, projectile)
 	{
-		for (let i = 0; i < creatures.length; i++) {
+		for (var i = 0; i < creatures.length; i++) {
 			if(projectile.user.id !== creatures[i].id  && !creatures[i].dead && util.getDistance(creatures[i], projectile) < 0)
 			{
 				creatures[i].hp -= projectile.damage;
@@ -1036,7 +1036,7 @@ module.exports = function(io) {
 
 	function moveloop()
 	{
-		for (let i = 0; i < mice.length; i++)
+		for (var i = 0; i < mice.length; i++)
 		{
 			if (tickMouse(mice[i]) === 'dead')
 			{
@@ -1044,7 +1044,7 @@ module.exports = function(io) {
 				i--;
 			}
 		}
-		for (let i = 0; i < spiders.length; i++)
+		for (var i = 0; i < spiders.length; i++)
 		{
 			if(tickSpider(spiders[i]) === 'dead')
 			{
@@ -1054,7 +1054,7 @@ module.exports = function(io) {
 		}
 
 
-		for (let i = 0; i < zombies.length; i++)
+		for (var i = 0; i < zombies.length; i++)
 		{
 			if(tickZombie(zombies[i]) === 'dead')
 			{
@@ -1068,7 +1068,7 @@ module.exports = function(io) {
 			// ????
 		}
 
-		for (let i = 0; i < users.length; i++)
+		for (var i = 0; i < users.length; i++)
 		{
 			if(tickPlayer(users[i]) === 'dead')
 			{
@@ -1082,7 +1082,7 @@ module.exports = function(io) {
 			}
 		}
 
-		for (let i = 0; i < projectiles.length; i++)
+		for (var i = 0; i < projectiles.length; i++)
 		{
 			if(tickProjectile(projectiles[i]) === 'dead')
 			{
@@ -1104,9 +1104,9 @@ module.exports = function(io) {
 		  			return b.xp - a.xp;
 				});
 
-			  let topUsers = [];
+			  var topUsers = [];
 
-			  for (let i = 0; i < Math.min(10, users.length); i++) {
+			  for (var i = 0; i < Math.min(10, users.length); i++) {
 					if(users[i].type == 'player' || users[i].type == 'fake') {
 						 topUsers.push({
 							  id: users[i].id,
@@ -1121,7 +1121,7 @@ module.exports = function(io) {
 					leaderboardChanged = true;
 			  }
 			  else {
-					for (let i = 0; i < leaderboard.length; i++) {
+					for (var i = 0; i < leaderboard.length; i++) {
 						 if (leaderboard[i].id !== topUsers[i].id) {
 							  leaderboard = topUsers;
 							  leaderboardChanged = true;
@@ -1287,8 +1287,8 @@ module.exports = function(io) {
 
 
 	// Don't touch, IP configurations.
-	// let ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
-	// let serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.KEREKT_PORT || conf.port;
+	// var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
+	// var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.KEREKT_PORT || conf.port;
 	// if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
 	// 	 http.listen( serverport, ipaddress, function() {
 	// 		  console.log('[DEBUG] Listening on *:' + serverport);
