@@ -1,7 +1,8 @@
 'use strict';
 
 module.exports = function(io) {
-
+'use strict';
+	
 	let express = require('express');
 	let app = express();
 	// let http = require('http').Server(app);
