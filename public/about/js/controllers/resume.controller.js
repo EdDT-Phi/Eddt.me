@@ -3,37 +3,29 @@ var app = angular.module('resume', []);
 // In production, the bundled pdf.js shall be used instead of RequireJS.
 require.config({paths: {'pdfjs': 'about/js/pdf'}});
 
-function getJsonFromUrl() {
-  var query = location.search.substr(1);
-  var result = {};
-  query.split("&").forEach(function(part) {
-    var item = part.split("=");
-    result[item[0]] = decodeURIComponent(item[1]);
-  });
-  return result;
-}
-
-
 app.controller('resumeCtrl', [
 '$scope', '$http',
 function($scope, $http){
 
-  $scope.text = true;
+  $scope.text = false;
 
   var init = function() {
     displayPDF();
   }
 
-  var mobile = window.innerWidth  < 1000;
+  var small = window.innerWidth  < 1000;
+  var mobile = window.innerWidth  < 500;
+  $scope.mobile = mobile;
+  $scope.width = window.innerWidth;
 
   $( window ).resize(function() {
     // $( "#log" ).append( "<div>Handler for .resize() called.</div>" );
-    if(mobile && window.innerWidth > 1000) {
-      mobile = false;
+    if(small && window.innerWidth > 1000) {
+      small = false;
       displayPDF();
     }
-    if(!mobile && window.innerWidth < 1000) {
-      mobile = true;
+    if(!small && window.innerWidth < 1000) {
+      small = true;
       displayPDF();
     }
   });
@@ -50,8 +42,11 @@ function($scope, $http){
 
           var scale = 1.5;
 
-          if(mobile) {
+          if(small) {
             scale = 1;
+          }
+          if(mobile) {
+            scale = 0.5;
           }
 
           var viewport = page.getViewport(scale);

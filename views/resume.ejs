@@ -60,16 +60,17 @@
 									<section>
 										<!-- <h3 class="major">PDF</h3> -->
 										<ul class="actions">
-											<li><a ng-click="text=false" class="button" ng-class="{special: !text}">PDF</a></li>
-											<li><a ng-click="text=true" class="button" ng-class="{special: text}">Text</a></li>
+											<li><a ng-show="!mobile" ng-click="text=false" class="button" ng-class="{special: !text}">PDF</a></li>
+											<li><a ng-show="mobile" href="about/assets/Eddie_Tribaldos_Resume.pdf" class="button">View PDF</a></li>
+											<li><a ng-show="!mobile" ng-click="text=true" class="button" ng-class="{special: text}">Text</a></li>
 										</ul>
 
-										<div ng-show="!text">
+										<div ng-show="!text && !mobile">
 											<a href="about/assets/Eddie_Tribaldos_Resume.pdf">Click here to download</a>
 											<br>
 											<canvas id="the-canvas"/>
 										</div>
-										<div ng-show="text">
+										<div ng-show="text || mobile">
 <br>
 <br>
 <h4 class="major">Contact</h4>
