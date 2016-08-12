@@ -14,14 +14,14 @@
 		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie9.css" /><![endif]-->
 		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie8.css" /><![endif]-->
 	</head>
-	<body>
+	<body ng-app="generic">
 
 		<!-- Page Wrapper -->
 			<div id="page-wrapper">
 
 				<!-- Header -->
 					<header id="header" class="alt">
-						<h1><a href="index.html">Eddie Tribaldos | About</a></h1>
+						<h1><a href="/about">Eddie Tribaldos | About</a></h1>
 						<nav>
 							<a href="#menu">Menu</a>
 						</nav>
@@ -30,15 +30,7 @@
 				<!-- Menu -->
 					<nav id="menu">
 						<div class="inner">
-							<h2>Menu</h2>
-							<ul class="links">
-								<li><a href="#">About</a></li>
-								<li><a href="/resume">Resume</a></li>
-								<li><a href="/">Game</a></li>
-								<!-- <li><a href="#">Log In</a></li> -->
-								<!-- <li><a href="#">Sign Up</a></li> -->
-							</ul>
-							<a href="#" class="close">Close</a>
+							<div ng-include="'/about/common/menu.ejs'"> </div>
 						</div>
 					</nav>
 
@@ -47,7 +39,7 @@
 						<div class="inner">
 							<!-- <div class="logo"><span class="icon fa-diamond"></span></div> -->
 							<h2>Eddie Tribaldos</h2>
-							<p>This site is under development! The purpose is to detail some personal information about me, as well as personal and professional projects I've worked on. It also has my <a href="/resume">resume</a>.It is built using a <a href="http://html5up.net">HTML5 UP</a> template, <a href="http://meanjs.org/">MEAN.JS</a> framework, hosted on <a href="https://www.digitalocean.com/">DigitalOcean</a></p>.
+							<p>This site is under development! The purpose is to detail some personal information about me, as well as personal and professional projects I've worked on. It also has my <a href="/resume">resume</a>.It is built using a <a href="http://html5up.net">HTML5 UP</a> template, <a href="http://meanjs.org/">MEAN.JS</a> framework, hosted on <a href="https://www.digitalocean.com/">DigitalOcean</a>.</p>
 						</div>
 					</section>
 
@@ -133,44 +125,8 @@
 					</section>
 
 				<!-- Footer -->
-					<section id="footer">
-						<div class="inner">
-							<h2 class="major">Get in touch</h2>
-							<p>Feel free to reach out to me! I respond 60% of the time, every time! (I'll actually probably respond)</p>
-							<!-- <form>
-								<div class="field">
-									<label for="name">Name</label>
-									<input type="text" name="name" id="name" />
-								</div>
-								<div class="field">
-									<label for="email">Email</label>
-									<input type="email" name="email" id="email" />
-								</div>
-								<div class="field">
-									<label for="message">Message</label>
-									<textarea name="message" id="message" rows="4"></textarea>
-								</div>
-								<ul class="actions">
-									<li><input type="submit" value="Send Message" /></li>
-								</ul>
-							</form> -->
-							<ul class="contact">
-<!-- 								<li class="fa-home">
-									Untitled Inc<br />
-									1234 Somewhere Road Suite #2894<br />
-									Nashville, TN 00000-0000
-								</li> -->
-								<!-- <li class="fa-phone">(915) 487-1920</li> -->
-								<li class="fa-envelope"><a href="mailto:eddie.tribaldos@utexas.edu?Subject=Virtual+introduction">eddie.tribaldos@utexas.edu</a></li>
-								<!-- <li class="fa-twitter"><a href="http://twitter.com/EdDTPhi">twitter.com/EdDTPhi</a></li> -->
-								<!-- <li class="fa-facebook"><a href="#">facebook.com/untitled-tld</a></li> -->
-								<li class="fa-github"><a href="https://github.com/EdDT-Phi">github.com/EdDT-Phi</a></li>
-							</ul>
-							<ul class="copyright">
-								<li>&copy; Untitled Inc. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-							</ul>
-						</div>
-					</section>
+					<div ng-include="'common/footer.ejs'">
+					</div>
 
 			</div>
 
@@ -181,6 +137,9 @@
 			<script src="js/util.js"></script>
 			<!--[if lte IE 8]><script src="js/ie/respond.min.js"></script><![endif]-->
 			<script src="js/main.js"></script>
+
+			<script src='/about/js/angular.js'></script>
+			<script src="/about/js/controllers/generic.controller.js"></script>
 
 	</body>
 </html>
