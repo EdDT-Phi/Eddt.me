@@ -18,4 +18,8 @@ router.get('/generic', function(req, res, next) {
   res.render('generic', { title: 'Express' });
 });
 
+router.get('/elements', function(req, res, next) {
+  res.render('elements', { title: 'Express' });
+});
+
 module.exports = router;
