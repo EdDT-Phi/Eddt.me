@@ -22,4 +22,8 @@ router.get('/elements', function(req, res, next) {
   res.render('elements', { title: 'Express' });
 });
 
+router.get('/references', function(req, res, next) {
+  res.render('references', { title: 'Express' });
+});
+
 module.exports = router;
