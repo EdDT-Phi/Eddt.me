@@ -4,8 +4,6 @@ module.exports = function(io) {
 
 	var express = require('express');
 	var app = express();
-	// var http = require('http').Server(app);
-	// var io = require('socket.io')(http);
 
 	var game_server = io.of('/game_io');
 
@@ -1137,11 +1135,6 @@ module.exports = function(io) {
 		users.forEach( function(u) {
 			if(u.type != 'fake')
 			{
-				// center the view if x/y is undefined, this will happen for spectators
-				// u.x = u.x || conf.gameWidth / 2;
-				// u.y = u.y || conf.gameHeight / 2;
-
-
 
 				/*
 					uses filter to get rid of undefined values
@@ -1283,18 +1276,3 @@ module.exports = function(io) {
 		setInterval(sendUpdates, 1000 / conf.gameFPS);
 	};
 }
-
-
-
-	// Don't touch, IP configurations.
-	// var ipaddress = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1';
-	// var serverport = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.KEREKT_PORT || conf.port;
-	// if (process.env.OPENSHIFT_NODEJS_IP !== undefined) {
-	// 	 http.listen( serverport, ipaddress, function() {
-	// 		  console.log('[DEBUG] Listening on *:' + serverport);
-	// 	 });
-	// } else {
-	// 	 http.listen( serverport, function() {
-	// 		  console.log('[DEBUG] Listening on *:' + serverport);
-	// 	 });
-	// }
